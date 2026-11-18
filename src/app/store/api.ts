@@ -25,7 +25,7 @@ import type {
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
-  SeoFieldVitals, SeoCrawlReport,
+  SeoFieldVitals, SeoCrawlReport, SeoPageList,
   SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
   DemoUsage, DbStats, DbStorageStats, DbConnection, DbConnectionInput, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
@@ -1882,6 +1882,12 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
     }),
 
+    getSeoPages: build.query<SeoPageList, { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) => `/api/workspaces/${workspaceId}/sites/${siteId}/seo/pages`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
+      keepUnusedDataFor: 600,
+    }),
+
     getSeoPreview: build.query<
       { html: string },
       { workspaceId: string; siteId: string; url: string }
@@ -3248,6 +3254,7 @@ export const {
   useRevealApiKeyMutation,
   useAnalyzeSeoMutation,
   useGetSeoReportsQuery,
+  useGetSeoPagesQuery,
   useGetLatestSeoReportQuery,
   useGetSeoPreviewQuery,
   useGetSeoReportQuery,

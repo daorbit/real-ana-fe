@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import { CircleAlert, FileCode2, Gauge, HeartPulse, LayoutGrid, type LucideIcon } from "lucide-react";
 
 /** A block inside a grouped tab, reachable by a jump link. */
 export type SeoSubId =
@@ -36,18 +36,21 @@ export const SEO_TABS: SeoTab[] = [
     label: "Overview",
     description: "The page's score, how it's trending, and the fixes that matter most.",
     helpId: "overview",
+    icon: LayoutGrid,
   },
   {
     id: "issues",
     label: "Issues",
     description: "Every problem the audit found on this page, worst first.",
     helpId: "issues",
+    icon: CircleAlert,
   },
   {
     id: "onpage",
     label: "On-page",
     description: "What's on the page itself: tags, copy, images and markup.",
     helpId: "meta",
+    icon: FileCode2,
     subs: [
       { id: "meta", label: "Meta tags", description: "How the page appears in search results and when shared." },
       { id: "content", label: "Content", description: "Headings, word count, readability and the keywords the page leans on." },
@@ -60,12 +63,14 @@ export const SEO_TABS: SeoTab[] = [
     label: "Performance",
     description: "Core Web Vitals from real visitors, Lighthouse lab scores, and what to speed up.",
     helpId: "performance",
+    icon: Gauge,
   },
   {
     id: "site",
     label: "Site health",
     description: "The site around the page: server setup, links, crawlability and AI access.",
     helpId: "technical",
+    icon: HeartPulse,
     subs: [
       { id: "technical", label: "Technical", description: "HTTPS, response, robots.txt, sitemap and the basics crawlers rely on." },
       { id: "links", label: "Links", description: "Broken links, redirects and server errors among this page's links." },

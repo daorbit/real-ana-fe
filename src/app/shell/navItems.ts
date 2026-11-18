@@ -9,8 +9,7 @@ import { AllAppsColorIcon } from "./colorIcons";
 import {
   AnalyticsNavIcon, AuditLogNavIcon, BillingNavIcon, BrandingNavIcon, DashboardsNavIcon,
   BookingsNavIcon, DevelopersNavIcon, FormAnalyticsNavIcon, LeadSourcesNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
-  ScheduledPostsNavIcon, SearchVisibilityNavIcon, SeoIssuesNavIcon, SeoOnPageNavIcon, SeoPerformanceNavIcon,
-  SeoSiteHealthNavIcon, SettingsNavIcon, WorkspacesNavIcon,
+  ScheduledPostsNavIcon, SearchVisibilityNavIcon, SettingsNavIcon, WorkspacesNavIcon,
 } from "./navIcons";
 
 export type NavTone =
@@ -68,13 +67,7 @@ export const NAV_GROUPS: NavGroup[] = [
         keywords: "seo audit",
         icon: RankLabNavIcon,
         tone: "teal",
-        defaultOpen: false,
-        children: [
-          { to: "/app/seo/issues", labelKey: "nav.seoIssues", label: "Issues", keywords: "seo problems errors warnings fixes", icon: SeoIssuesNavIcon },
-          { to: "/app/seo/onpage", labelKey: "nav.seoOnPage", label: "On-page", keywords: "meta tags content images structured data schema", icon: SeoOnPageNavIcon },
-          { to: "/app/seo/performance", labelKey: "nav.seoPerformance", label: "Performance", keywords: "core web vitals lighthouse speed", icon: SeoPerformanceNavIcon },
-          { to: "/app/seo/site", labelKey: "nav.seoSiteHealth", label: "Site health", keywords: "technical links crawl robots sitemap ai search", icon: SeoSiteHealthNavIcon },
-        ],
+        defaultOpen: true,
       },
       {
         to: "/app/lead-capture",

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Button, Select } from "@mantine/core";
 import { Globe, Link2 } from "lucide-react";
-import type { Site } from "@/shared/types";
+import type { SeoPage, Site } from "@/shared/types";
+import { RoutePicker } from "./RoutePicker";
 import layout from "./SeoLayout.module.css";
 
 export function SeoInspectBar({
@@ -12,8 +13,10 @@ export function SeoInspectBar({
   domainLabel,
   path,
   onPath,
+  onRoute,
   onRun,
   analyzing,
+  pages,
   hero = false,
   footer,
 }: {
@@ -24,24 +27,29 @@ export function SeoInspectBar({
   domainLabel: string;
   path: string;
   onPath: (path: string) => void;
+  onRoute: (path: string) => void;
   onRun: () => void;
   analyzing: boolean;
+  pages: SeoPage[];
   hero?: boolean;
   footer?: ReactNode;
 }) {
   const bar = (
     <div className={layout.inspect} data-hero={hero || undefined} data-grouped={footer ? true : undefined}>
-      <Select
-        variant="unstyled"
-        className={layout.siteSelect}
-        aria-label="Site"
-        data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-        value={siteId}
-        onChange={(v) => v && onSite(v)}
-        allowDeselect={false}
-        leftSection={<Globe size={15} />}
-        comboboxProps={{ withinPortal: true, width: 260, position: "bottom-start" }}
-      />
+      {sites.length > 1 && (
+        <Select
+          variant="unstyled"
+          className={layout.siteSelect}
+          aria-label="Site"
+          data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+          value={siteId}
+          onChange={(v) => v && onSite(v)}
+          allowDeselect={false}
+          leftSection={<Globe size={15} />}
+          comboboxProps={{ withinPortal: true, width: 260, position: "bottom-start" }}
+        />
+      )}
+      <RoutePicker pages={pages} path={path} onPick={onRoute} />
       {canEdit && (
         <>
           <label className={layout.address}>

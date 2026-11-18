@@ -207,6 +207,39 @@
   font-size: var(--mantine-font-size-sm);
 }
 
+.report {
+  transition: opacity 160ms ease;
+}
+
+.report[data-stale] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.routeOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.routePath {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--text);
+}
+
+.routeHint {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .inspectButton {
   flex-shrink: 0;
   border-radius: 8px;

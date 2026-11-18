@@ -120,8 +120,45 @@
 }
 
 .name {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.score {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.score[data-tone="good"] {
+  color: var(--green);
+}
+
+.score[data-tone="warn"] {
+  color: var(--amber);
+}
+
+.score[data-tone="bad"] {
+  color: var(--red);
+}
+
+.more {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: left;
+  color: var(--muted);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.more:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
 }

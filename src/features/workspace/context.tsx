@@ -34,7 +34,7 @@ const Ctx = createContext<WsState | null>(null);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Cached by RTK Query — the list is fetched once and reused across pages.
-  const { data, isLoading, isError, refetch } = useGetWorkspacesQuery();
+  const { data, isError, refetch } = useGetWorkspacesQuery();
   const { demo } = useDemo();
   const workspaces = demo ? demoWorkspaces : data ?? EMPTY;
 
@@ -66,7 +66,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       value={{
         workspaces,
         active,
-        loading: demo ? false : isLoading,
+        loading: demo ? false : data === undefined && !isError,
         fetchFailed: demo ? false : isError,
         needsChoice,
         setActive,

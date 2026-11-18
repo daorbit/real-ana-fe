@@ -49,10 +49,12 @@ import {
   SEO_TABS, isSeoTab, resolveSeoSection, seoTabPath, type SeoSubId, type SeoTabId,
 } from "@/features/seo/components/sections";
 import { SeoInspectSkeleton, SeoTabSkeleton } from "@/features/seo/components/layout/SeoSkeletons";
-import { SeoTabEmpty } from "@/features/seo/components/layout/SeoTabEmpty";
+import { SeoHelpLink, SeoTabIntro, type SeoTabCount } from "@/features/seo/components/layout/SeoTabs";
+import { SeoTabBar } from "@/features/seo/components/layout/SeoTabBar";
+import { useSeoPages } from "@/features/seo/hooks/useSeoPages";
 import {
-  SeoHelpLink, SeoOverviewLink, SeoTabDescription, SeoTabIntro, SeoTabTitle, type SeoTabCount,
-} from "@/features/seo/components/layout/SeoTabs";
+  SEO_PAGE_PARAM, SEO_SITE_PARAM, normalizePagePath, pageAddress, pickSeoSite, seoPageSearch,
+} from "@/features/seo/lib/seoPageParams";
 import { ReportMeta } from "@/features/seo/components/layout/ReportMeta";
 import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -285,15 +287,14 @@ export default function Seo() {
   const sitesLoading = !demo && realSitesLoading;
   const sitesFailed = !demo && realSitesFailed;
 
-  const [picked, setPicked] = useState<string>("");
-  const [path, setPath] = useState("/");
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const page = normalizePagePath(params.get(SEO_PAGE_PARAM));
+  const [path, setPath] = useState(page);
   const { tab: pathTab } = useParams();
   const legacySection = params.get("section");
   const resolved = resolveSeoSection(legacySection);
   const tab: SeoTabId = isSeoTab(pathTab) ? pathTab : resolved.tab;
-  const onOverview = tab === "overview";
 
   useEffect(() => {
     const badPath = pathTab !== undefined && !isSeoTab(pathTab);
@@ -340,13 +341,26 @@ export default function Seo() {
   const [helpOpen, setHelpOpen] = useState(false);
 
 
-  const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
+  const site = pickSeoSite(sites, params.get(SEO_SITE_PARAM));
   const siteId = site?.siteId ?? "";
+  const pendingView = useRef<string | null>(null);
 
   useEffect(() => {
-    setViewingId(null);
-    setPath("/");
-  }, [siteId]);
+    setViewingId(pendingView.current);
+    pendingView.current = null;
+    setPath(page);
+  }, [siteId, page]);
+
+  const selectPage = (nextSite: string, nextPath: string, reportId: string | null = null) => {
+    const next = normalizePagePath(nextPath);
+    if (nextSite === siteId && next === page) {
+      setViewingId(reportId);
+      setPath(next);
+      return;
+    }
+    pendingView.current = reportId;
+    navigate(`${window.location.pathname}${seoPageSearch(window.location.search, nextSite, next)}`);
+  };
 
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
   const auditRequest = useRef<{ abort: () => void } | null>(null);
@@ -391,12 +405,28 @@ export default function Seo() {
   );
   const history = demo ? demoSeoHistory : realHistory;
   const historyLoading = !demo && realHistoryLoading;
-
-  const { data: realLatest, isFetching: realLatestFetching } = useGetLatestSeoReportQuery(
-    { workspaceId, siteId },
-    { skip: !workspaceId || !siteId }
+  const seoPages = useSeoPages(workspaceId, siteId);
+  const pageHistory = useMemo(
+    () => history.filter((h) => normalizePagePath(h.url) === page),
+    [history, page]
   );
-  const latest = demo ? demoSeoReport : realLatest;
+
+  const domainLabel = useMemo(
+    () => (site ? site.domain.replace(/^https?:\/\//i, "").replace(/\/$/, "") : ""),
+    [site]
+  );
+  const pageUrl = domainLabel ? pageAddress(domainLabel, page) : "";
+
+  const {
+    currentData: realLatest, data: lastLatest, isFetching: realLatestFetching,
+  } = useGetLatestSeoReportQuery(
+    { workspaceId, siteId, url: pageUrl },
+    { skip: !workspaceId || !siteId || !pageUrl || demo }
+  );
+  const heldLatest =
+    !realLatest && realLatestFetching && lastLatest?.siteId === siteId ? lastLatest : undefined;
+  const switchingPage = Boolean(heldLatest) && !viewingId;
+  const latest = demo ? demoSeoReport : realLatest ?? heldLatest;
   const latestFetching = !demo && realLatestFetching;
 
   // History beyond the latest run has no full report fixture behind it (just
@@ -442,35 +472,27 @@ export default function Seo() {
     }
   }, [data]);
 
-  /** The site's bare hostname, shown as a fixed prefix on the path field. */
-  const domainLabel = useMemo(
-    () => (site ? site.domain.replace(/^https?:\/\//i, "").replace(/\/$/, "") : ""),
-    [site]
-  );
+  const targetUrl = domainLabel ? pageAddress(domainLabel, normalizePagePath(path)) : "";
 
-  const targetUrl = useMemo(() => {
-    if (!domainLabel) return "";
-    const suffix = path.startsWith("/") ? path : `/${path}`;
-    return `https://${domainLabel}${suffix === "/" ? "" : suffix}`;
-  }, [domainLabel, path]);
-
-  async function run(refresh: boolean) {
+  async function run(refresh: boolean, routePath?: string) {
     if (!site) return;
     if (demo) {
       notify.error("Turn off demo data to run an audit.");
       return;
     }
+    const auditPath = normalizePagePath(routePath ?? path);
+    setPath(auditPath);
     auditCancelled.current = false;
     const request = analyze({
       workspaceId,
       siteId: site.siteId,
-      url: targetUrl,
+      url: pageAddress(domainLabel, auditPath),
       refresh,
     });
     auditRequest.current = request;
     try {
       const res = await request.unwrap();
-      setViewingId(res.report._id);
+      selectPage(site.siteId, auditPath, res.report._id);
       notify.success(
         res.cached ? "Showing the most recent audit for this URL" : "Analysis complete"
       );
@@ -510,21 +532,19 @@ export default function Seo() {
   }
 
 
-  const pageTitle = onOverview ? "SEO" : <SeoTabTitle tab={tabDef} count={tabCounts[tab]} />;
-  const pageDescription = onOverview ? (
+  const pageTitle = "SEO";
+  const pageDescription = (
     <>
-      Audit a tracked site's meta tags, content, technical setup and Lighthouse scores.{" "}
+      Audit each page of a tracked site: meta tags, content, technical setup and Lighthouse scores.{" "}
       <SeoHelpLink onHelp={() => setHelpOpen(true)} />
     </>
-  ) : (
-    <SeoTabDescription tab={tabDef} onHelp={() => setHelpOpen(true)} />
   );
 
   if (sitesLoading) {
     return (
       <AppShell>
         <PageHeader title={pageTitle} description={pageDescription} docsPath={DOCS_SLUGS.seo} />
-        {onOverview && <SeoInspectSkeleton />}
+        <SeoInspectSkeleton />
         <SeoTabSkeleton tab={tab} />
       </AppShell>
     );
@@ -564,13 +584,17 @@ export default function Seo() {
       hero={hero}
       sites={sites}
       siteId={siteId}
-      onSite={setPicked}
+      onSite={(next) => selectPage(next, "/")}
       canEdit={canEdit}
       domainLabel={domainLabel}
       path={path}
       onPath={setPath}
+      onRoute={(next) =>
+        seoPages.pages.some((p) => p.path === next && p.audit) ? selectPage(siteId, next) : setPath(next)
+      }
       onRun={() => run(false)}
       analyzing={analyzing}
+      pages={seoPages.pages}
       footer={hero ? undefined : reportMeta ?? <Skeleton height={10} width={200} radius="sm" />}
     />
   );
@@ -590,12 +614,7 @@ export default function Seo() {
         description={pageDescription}
         docsPath={DOCS_SLUGS.seo}
         actions={
-          !onOverview ? (
-            <div className={layout.subActions}>
-              <SeoOverviewLink />
-              {reportMeta}
-            </div>
-          ) : report && (
+          report && (
             <Group gap="sm">
               {history.length > 0 && (
                 <Button variant="default" leftSection={<History size={15} />} onClick={() => setHistoryOpen(true)}>
@@ -626,9 +645,7 @@ export default function Seo() {
         }
       />
 
-      {showStart && !onOverview ? (
-        <SeoTabEmpty tab={tab as Exclude<SeoTabId, "overview">} canEdit={canEdit} domain={domainLabel} />
-      ) : showStart ? (
+      {showStart ? (
         <SeoStartPanel
           domain={domainLabel}
           canEdit={canEdit}
@@ -637,15 +654,20 @@ export default function Seo() {
           inspectBar={inspectBar(true)}
         />
       ) : (
-        onOverview && (report || analyzing) && inspectBar(false)
+        (report || analyzing) && inspectBar(false)
       )}
 
       <Box mt="xs">
+        {(data || loading) && (
+          <>
+            <div ref={tabsTop} className={layout.anchor} />
+            <SeoTabBar active={tab} counts={tabCounts} onChange={setTab} />
+          </>
+        )}
         {loading && !data && <SeoTabSkeleton tab={tab} />}
 
         {data && report && (
           <>
-            <div ref={tabsTop} className={layout.anchor} />
             <SeoTabIntro tab={tabDef} onHelp={() => setHelpOpen(true)} onJump={jumpTo} showText={false} />
 
             <HelpDrawer
@@ -656,11 +678,13 @@ export default function Seo() {
               initialId={tabDef.helpId}
             />
 
-            <div className="seo-report">
+            <div className={`seo-report ${layout.report}`} data-stale={switchingPage || undefined} aria-busy={switchingPage}>
               {SEO_TABS.filter((x) => visited.has(x.id)).map((x) => (
                 <div
                   key={x.id}
                   id={`seo-panel-${x.id}`}
+                  role="tabpanel"
+                  aria-labelledby={`seo-tab-${x.id}`}
                   hidden={x.id !== tab}
                 >
                   {x.id === "overview" && (
@@ -674,11 +698,10 @@ export default function Seo() {
                         technical: data.technical,
                         siteFiles: data.siteFiles,
                       }}
-                      history={history}
+                      history={pageHistory}
                       onViewIssues={() => setTab("issues")}
                     />
-                  )}
-                  {x.id === "issues" && <IssuesPanel data={data} />}
+                  )}                  {x.id === "issues" && <IssuesPanel data={data} />}
                   {x.id === "onpage" && (
                     <>
                       <Block id="meta"><MetaPanel meta={data.meta} url={data.finalUrl} /></Block>
@@ -725,7 +748,8 @@ export default function Seo() {
                 loading={historyLoading}
                 openId={report._id}
                 onOpen={(id) => {
-                  setViewingId(id);
+                  const row = history.find((h) => h._id === id);
+                  selectPage(siteId, row ? normalizePagePath(row.url) : page, id);
                   setHistoryOpen(false);
                   setTab("overview");
                 }}

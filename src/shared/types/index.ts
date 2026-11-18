@@ -2159,6 +2159,12 @@ export type PublicSeoReport = {
 /** A history row: the same document with the heavy body left out. */
 export type SeoReportSummary = Omit<SeoReport, "data">;
 
+export type SeoPageAudit = { reportId: string; score: number; createdAt: string };
+
+export type SeoPage = { path: string; inSitemap: boolean; audit: SeoPageAudit | null };
+
+export type SeoPageList = { sitemap: boolean; pages: SeoPage[] };
+
 /** A competitor page snapshot, scored on on-page signals only. */
 export type SeoCompareSnapshot = {
   url: string;
