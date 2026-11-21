@@ -20,11 +20,6 @@
   background: var(--shell);
 }
 
-:global([data-bg-style="textured"]) .tabbarWrap[data-stuck] {
-  background: color-mix(in srgb, var(--shell) 82%, transparent);
-  backdrop-filter: blur(10px);
-}
-
 .tabbar {
   display: flex;
   gap: 4px;

@@ -3455,11 +3455,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   margin-bottom: var(--mantine-spacing-md);
 }
 
-[data-bg-style="textured"] .page-header--sticky {
-  background: color-mix(in srgb, var(--shell) 82%, transparent);
-  backdrop-filter: blur(10px);
-}
-
 @media (max-width: 48em) {
   .page-header--sticky {
     top: calc(var(--mantine-spacing-sm) * -1);
@@ -3736,71 +3731,54 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-/*
- * Skeleton shimmer.
- *
- * Mantine's placeholder animates opacity — the whole block fades in and out
- * together, which at card size reads as the page flickering rather than as
- * something arriving. A highlight travelling across it has a direction, so a
- * screen full of them reads as one surface loading.
- *
- * Written against Skeleton's real structure rather than a guess at it: the
- * component paints `::before` as the body-coloured mask and `::after` as the
- * visible grey block (z-index 10 and 11), and marks itself `[data-visible]`
- * while it is standing in for something and `[data-animate]` when it may move.
- * So the sweep goes on `::after`'s own background — there is no third
- * pseudo-element to put it on — and the root already clips it.
- *
- * Targeted via `:has()` on those attributes instead of Mantine's hashed class
- * (`m_18320242`), which is a build artifact and not ours to depend on.
- */
-.skeleton-shimmer[data-visible][data-animate]::after {
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--mantine-color-white) 6%, transparent) 40%,
-    color-mix(in srgb, var(--mantine-color-white) 11%, transparent) 50%,
-    color-mix(in srgb, var(--mantine-color-white) 6%, transparent) 60%,
-    transparent 100%
-  );
-  background-repeat: no-repeat;
-  background-size: 220% 100%;
-  /* Replaces the opacity pulse rather than running alongside it. */
-  animation: skeleton-sweep 1.5s ease-in-out infinite !important;
+:root .mantine-Skeleton-root {
+  --skeleton-base: color-mix(in srgb, var(--text) 9%, var(--surface));
+  --skeleton-sheen: color-mix(in srgb, var(--mantine-color-white) 9%, transparent);
+  transform: none;
+  -webkit-transform: none;
 }
 
-[data-mantine-color-scheme="light"] .skeleton-shimmer[data-visible][data-animate]::after {
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--mantine-color-white) 45%, transparent) 40%,
-    color-mix(in srgb, var(--mantine-color-white) 80%, transparent) 50%,
-    color-mix(in srgb, var(--mantine-color-white) 45%, transparent) 60%,
-    transparent 100%
-  );
+[data-mantine-color-scheme="light"] .mantine-Skeleton-root {
+  --skeleton-base: color-mix(in srgb, var(--text) 7%, var(--surface));
+  --skeleton-sheen: color-mix(in srgb, var(--mantine-color-white) 70%, transparent);
 }
 
-.an-report .skeleton-shimmer[data-visible]::after,
-.seo-report .skeleton-shimmer[data-visible]::after {
-  background-color: color-mix(in srgb, var(--text) 9%, var(--surface));
+:root .mantine-Skeleton-root[data-visible] {
+  background-color: var(--skeleton-base);
 }
 
-[data-mantine-color-scheme="light"] .an-report .skeleton-shimmer[data-visible]::after,
-[data-mantine-color-scheme="light"] .seo-report .skeleton-shimmer[data-visible]::after {
-  background-color: color-mix(in srgb, var(--text) 7%, var(--surface));
+:root .mantine-Skeleton-root[data-visible]::before {
+  background-color: var(--skeleton-base);
+}
+
+:root .mantine-Skeleton-root[data-visible]::after {
+  background: linear-gradient(90deg, transparent 0%, var(--skeleton-sheen) 50%, transparent 100%);
+  opacity: 0;
+  transform: translateX(-100%);
+  animation: none;
+}
+
+:root .mantine-Skeleton-root[data-visible][data-animate]::after {
+  opacity: 1;
+  animation: skeleton-sweep 1.5s ease-in-out infinite;
 }
 
 @keyframes skeleton-sweep {
-  from { background-position: 120% 0; }
-  to { background-position: -120% 0; }
+  to {
+    transform: translateX(100%);
+  }
 }
 
-/* The grey block still shows where content will land; only the travel stops. */
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-shimmer[data-visible][data-animate]::after {
-    background-image: none;
+  :root .mantine-Skeleton-root[data-visible][data-animate]::after {
+    opacity: 0;
     animation: none !important;
   }
+}
+
+[data-motion="off"] .mantine-Skeleton-root[data-visible][data-animate]::after {
+  opacity: 0;
+  animation: none !important;
 }
 
 

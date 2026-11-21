@@ -20,7 +20,7 @@ export function Bone({
       height={h}
       radius={RADIUS[shape]}
       circle={shape === "circle" && w === h}
-      className={`skeleton-shimmer ${className ?? ""}`}
+      className={className}
       aria-hidden
     />
   );

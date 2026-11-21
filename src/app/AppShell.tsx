@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useContext, useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell as MantineShell, Box, Overlay } from "@mantine/core";
@@ -15,6 +15,7 @@ import { OrbitExtensionPrompt } from "@/features/orbit/components/OrbitExtension
 import { OfflineBar } from "@/shared/ui/OfflineBar";
 import { ImpersonationBar } from "./shell/ImpersonationBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
+import { RouteFallback } from "@/shared/ui/RouteFallback";
 import { useDemo } from "@/features/demo/context";
 import { DemoUnsupportedDialog } from "@/features/demo/DemoUnsupportedDialog";
 import { Starfield } from "@/shared/ui/Starfield";
@@ -186,23 +187,21 @@ export function ShellFrame({ children }: { children: ReactNode }) {
               <div ref={scrollTop} className="app-panel__top" aria-hidden />
               <PlanExpiryNotice />
               <QuotaNudge />
-              <motion.div
-                key={pageKey}
-                className="route-fade"
-                initial={motionOff ? false : pushIn ? { opacity: 0, x: 28 } : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                transition={
-                  motionOff
-                    ? { duration: 0 }
-                    : { duration: pushIn ? 0.26 : 0.18, ease: [0.16, 1, 0.3, 1] }
-                }
-              >
-                <ShellMountedContext.Provider value>
-                  <RailAutoCollapseContext.Provider value={setAutoCollapsed}>
-                    {children}
-                  </RailAutoCollapseContext.Provider>
-                </ShellMountedContext.Provider>
-              </motion.div>
+              <Suspense fallback={<RouteFallback />}>
+                <motion.div
+                  key={pageKey}
+                  className="route-fade"
+                  initial={motionOff || !pushIn ? false : { opacity: 0, x: 28 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={motionOff ? { duration: 0 } : { duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <ShellMountedContext.Provider value>
+                    <RailAutoCollapseContext.Provider value={setAutoCollapsed}>
+                      {children}
+                    </RailAutoCollapseContext.Provider>
+                  </ShellMountedContext.Provider>
+                </motion.div>
+              </Suspense>
             </div>
 
             <div id="panel-overlay-root" />

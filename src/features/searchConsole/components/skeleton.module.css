@@ -3,8 +3,7 @@
   user-select: none;
 }
 
-.loading :global(.mantine-Skeleton-root),
-.loading :global(.skeleton-shimmer) {
+.loading :global(.mantine-Skeleton-root) {
   flex-shrink: 0;
   max-width: 100%;
 }

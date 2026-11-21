@@ -207,7 +207,7 @@ function FocusOnRouteChange() {
       (document.querySelector("main") as HTMLElement | null);
     if (!target) return;
     target.setAttribute("tabindex", "-1");
-    target.focus({ preventScroll: false });
+    target.focus({ preventScroll: true });
     const drop = () => {
       target.removeAttribute("tabindex");
       target.removeEventListener("blur", drop);

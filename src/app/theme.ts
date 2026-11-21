@@ -70,8 +70,6 @@ export const theme = createTheme({
       }),
     }),
  
-    Skeleton: { defaultProps: { className: "skeleton-shimmer" } },
- 
     Badge: {
  
       vars: () => ({
