@@ -36,7 +36,7 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   background: #fff;
   transition: opacity 150ms ease;
 }
@@ -46,7 +46,7 @@
   height: 34px;
   flex-shrink: 0;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   background: #fff;
 }
 

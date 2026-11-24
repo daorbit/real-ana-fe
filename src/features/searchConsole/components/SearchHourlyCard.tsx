@@ -6,7 +6,7 @@ import { compact } from "@/shared/lib";
 import { useGetSearchHourlyQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchHourly } from "@/features/demo/demoSearchConsole";
-import type { SearchHourly, SearchMetrics, SearchType } from "@/shared/types";
+import type { SearchFilter, SearchHourly, SearchMetrics, SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange } from "../searchMetrics";
 import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./searchConsole.module.css";
@@ -63,9 +63,19 @@ function Stat({ metric, current, previous }: { metric: HourlyMetric; current: Se
   );
 }
 
-export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: string; siteId: string; type: SearchType }) {
+export function SearchHourlyCard({
+  workspaceId,
+  siteId,
+  type,
+  filters,
+}: {
+  workspaceId: string;
+  siteId: string;
+  type: SearchType;
+  filters?: SearchFilter[];
+}) {
   const [metric, setMetric] = useState<HourlyMetric>("impressions");
-  const real = useGetSearchHourlyQuery({ workspaceId, siteId, type });
+  const real = useGetSearchHourlyQuery({ workspaceId, siteId, type, filters });
   const { demo } = useDemo();
   const sample = useMemo(() => (demo ? demoSearchHourly(type) : null), [demo, type]);
   const data = sample ?? real.data;

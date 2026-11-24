@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Menu, TextInput } from "@mantine/core";
 import { Check, Search } from "lucide-react";
+import type { WorkspaceIcon } from "@/shared/types";
+import { WorkspaceLogo } from "./WorkspaceLogo";
 import classes from "./WorkspaceList.module.css";
 
 const SEARCH_FROM = 6;
 
-type WorkspaceRow = { _id: string; name: string };
+type WorkspaceRow = { _id: string; name: string; icon?: WorkspaceIcon | null };
 
 export function WorkspaceList({
   workspaces,
@@ -62,6 +64,7 @@ export function WorkspaceList({
               data-ws-item
               data-current={current || undefined}
               onClick={() => onPick(w._id)}
+              leftSection={<WorkspaceLogo icon={w.icon} className={classes.logo} />}
               rightSection={
                 current ? (
                   <Check size={15} className={classes.check} />

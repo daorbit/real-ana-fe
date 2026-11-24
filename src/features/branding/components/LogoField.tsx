@@ -30,7 +30,7 @@ export function LogoField({ form }: { form: BrandingForm }) {
         <div className={classes.rowHint}>
           {logoBroken
             ? "That image couldn't be loaded. Pick another one."
-            : "A square image works best. It sits next to your name on forms and payments."}
+            : "A square image works best. Used on forms and payments, and as your workspace logo."}
         </div>
       </div>
 

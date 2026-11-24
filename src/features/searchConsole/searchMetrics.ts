@@ -67,6 +67,7 @@ export const SEARCH_TYPE_OPTIONS = [
     group: "Google Search",
     items: [
       { value: "web", label: "Web" },
+      { value: "webMultimodal", label: "Lens and image search" },
       { value: "image", label: "Image" },
       { value: "video", label: "Video" },
       { value: "news", label: "News tab" },
@@ -81,7 +82,7 @@ export const SEARCH_TYPE_OPTIONS = [
   },
 ];
 
-const TYPES_WITHOUT_QUERIES: SearchType[] = ["discover", "googleNews"];
+const TYPES_WITHOUT_QUERIES: SearchType[] = ["webMultimodal", "discover", "googleNews"];
 
 export function typeHasQueries(type: SearchType): boolean {
   return !TYPES_WITHOUT_QUERIES.includes(type);

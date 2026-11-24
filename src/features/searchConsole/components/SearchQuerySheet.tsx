@@ -6,7 +6,7 @@ import { ErrorState } from "@/shared/ui/ErrorState";
 import { errMessage } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchDrilldown } from "@/features/demo/demoSearchConsole";
-import type { SearchType } from "@/shared/types";
+import type { SearchFilter, SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, pagePath, type MetricKey } from "../searchMetrics";
 import { useSearchTask } from "../useSearchTask";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
@@ -27,6 +27,7 @@ export function SearchQuerySheet({
   siteId,
   days,
   type,
+  filters,
 }: {
   query: string | null;
   onClose: () => void;
@@ -36,6 +37,7 @@ export function SearchQuerySheet({
   siteId: string;
   days: number;
   type: SearchType;
+  filters?: SearchFilter[];
 }) {
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
   const [shown, setShown] = useState<string | null>(query);
@@ -49,7 +51,7 @@ export function SearchQuerySheet({
   }, [query]);
 
   const real = useGetSearchDrilldownQuery(
-    { workspaceId, siteId, days, type, dimension: "query", value: shown ?? "" },
+    { workspaceId, siteId, days, type, filters, dimension: "query", value: shown ?? "" },
     { skip: !shown },
   );
   const { demo } = useDemo();
@@ -57,7 +59,7 @@ export function SearchQuerySheet({
     () => (demo && shown ? demoSearchDrilldown("query", shown, days) : null),
     [demo, shown, days],
   );
-  const data = sample ?? real.data;
+  const data = sample ?? (real.error ? real.currentData : real.data);
   const isFetching = sample ? false : real.isFetching;
   const error = sample ? undefined : real.error;
   const loaded = data && data.value === shown && data.dimension === "query" && !isFetching ? data : null;
@@ -82,7 +84,7 @@ export function SearchQuerySheet({
       aria-label="Search query details"
       title={
         <div>
-          <Text className={classes.eyebrow}>Query · last {days} days</Text>
+          <Text className={classes.eyebrow}>Query · last {days} days{filters ? " · filtered" : ""}</Text>
           <Text className={classes.title}>“{shown}”</Text>
         </div>
       }

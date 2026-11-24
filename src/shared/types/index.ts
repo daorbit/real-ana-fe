@@ -2632,10 +2632,103 @@ export type SearchPerformance = {
   daily: (SearchMetrics & { date: string })[];
   queries: (SearchMetrics & { query: string })[];
   pages: (SearchMetrics & { page: string; views?: number })[];
+  branded?: SearchBrandedSplit | null;
   fetchedAt: string;
 };
 
-export type SearchBreakdownDimension = "query" | "page" | "country" | "device";
+export type SearchBrandedPair = { branded: SearchMetrics; nonBranded: SearchMetrics };
+
+export type SearchBrandedSplit = SearchBrandedPair & { previous: SearchBrandedPair | null; since: string | null };
+
+export type SearchFilterDimension =
+  | "query"
+  | "page"
+  | "country"
+  | "device"
+  | "searchAppearance"
+  | "brandedClassification";
+
+export type SearchFilterOperator =
+  | "equals"
+  | "notEquals"
+  | "contains"
+  | "notContains"
+  | "includingRegex"
+  | "excludingRegex";
+
+export type SearchFilter = {
+  dimension: SearchFilterDimension;
+  operator: SearchFilterOperator;
+  expression: string;
+};
+
+export type SearchVitalsDevice = "mobile" | "desktop" | "all";
+
+export type SearchVitalRating = "good" | "needs-improvement" | "poor";
+
+export type SearchWebVital = {
+  p75: number;
+  previousP75: number | null;
+  good: number;
+  needsImprovement: number;
+  poor: number;
+  rating: SearchVitalRating;
+  trend: (number | null)[];
+};
+
+export type SearchWebVitals = {
+  status: "ready" | "no_data" | "not_configured";
+  device: SearchVitalsDevice;
+  origin: string;
+  passing: boolean | null;
+  periods: string[];
+  metrics: Record<SeoVitalKey, SearchWebVital | null>;
+  fetchedAt: string;
+};
+
+export type SearchPageVital = { p75: number; rating: SearchVitalRating };
+
+export type SearchPageVitals = {
+  status: "ready" | "not_configured";
+  device: SearchVitalsDevice;
+  pages: {
+    url: string;
+    clicks: number;
+    passing: boolean | null;
+    lcp: SearchPageVital | null;
+    inp: SearchPageVital | null;
+    cls: SearchPageVital | null;
+  }[];
+  fetchedAt: string;
+};
+
+export type SearchIndexState = "indexed" | "not_indexed" | "blocked" | "failed";
+
+export type SearchIndexCheck = {
+  state: SearchIndexState;
+  reason: string;
+  lastCrawled: string | null;
+  richResults: { type: string; issues: number }[];
+  checkedAt: string;
+};
+
+export type SearchIndexPage = {
+  url: string;
+  inSitemap: boolean;
+  clicks: number | null;
+  check: SearchIndexCheck | null;
+};
+
+export type SearchIndexing = { pages: SearchIndexPage[]; sitemapPages: number; days: number };
+
+export type SearchIndexCheckRun = {
+  checks: (SearchIndexCheck & { url: string })[];
+  remaining: number;
+  stopped: string | null;
+  outOfChecks: boolean;
+};
+
+export type SearchBreakdownDimension = "query" | "page" | "country" | "device" | "searchAppearance";
 
 export type SearchBreakdownRow = SearchMetrics & {
   key: string;
@@ -2644,7 +2737,7 @@ export type SearchBreakdownRow = SearchMetrics & {
   views?: number;
 };
 
-export type SearchType = "web" | "image" | "video" | "news" | "discover" | "googleNews";
+export type SearchType = "web" | "webMultimodal" | "image" | "video" | "news" | "discover" | "googleNews";
 
 export type SearchHourly = {
   type: SearchType;

@@ -1,7 +1,7 @@
 import type {
   SearchConsoleStatus, SearchPerformance, SearchBreakdown, SearchBreakdownDimension,
   SearchBreakdownRow, SearchInsights, SearchInsightRow, SearchHourly, SearchSitemaps,
-  SearchInspection, SearchDrilldown, SearchMetrics, SearchType,
+  SearchInspection, SearchDrilldown, SearchMetrics, SearchBrandedPair, SearchType,
 } from "@/shared/types";
 import { DEMO_SITE_ID } from "@/features/demo/demoData";
 import { demoDrift } from "@/features/demo/demoDrift";
@@ -29,6 +29,7 @@ const QUERIES = [
 ];
 const COUNTRIES = ["USA", "GBR", "IND", "DEU", "CAN"];
 const DEVICES = ["DESKTOP", "MOBILE", "TABLET"];
+const APPEARANCES = ["PRODUCT_SNIPPETS", "REVIEW_SNIPPET", "VIDEO", "TRANSLATED_RESULT"];
 
 function metrics(rand: () => number, scale: number): SearchMetrics {
   const impressions = Math.round(scale * (0.7 + rand() * 0.6));
@@ -49,6 +50,15 @@ function rankedRows(labels: string[], seed: number, total: number): SearchBreakd
     const previousPosition = Number((m.position + (rand() - 0.5) * 3).toFixed(1));
     return { key, ...m, previousClicks, previousPosition };
   });
+}
+
+function brandPair(totals: SearchMetrics, share: number): SearchBrandedPair {
+  const part = (ratio: number, position: number): SearchMetrics => {
+    const clicks = Math.round(totals.clicks * ratio);
+    const impressions = Math.round(totals.impressions * (ratio > 0.5 ? 0.72 : 0.28));
+    return { clicks, impressions, ctr: impressions ? clicks / impressions : 0, position };
+  };
+  return { branded: part(share, 1.8), nonBranded: part(1 - share, 11.4) };
 }
 
 function dailySeries(days: number, seed: number, dailyTotal: number) {
@@ -111,6 +121,7 @@ export function demoSearchPerformance(days = 28, type: SearchType = "web"): Sear
     daily,
     queries: rankedRows(QUERIES, 0x5e3, totals.clicks).map((r) => ({ ...r, query: r.key })),
     pages: rankedRows(PAGES, 0x5e4, totals.clicks).map((r) => ({ ...r, page: `https://acme.example${r.key}`, views: r.clicks * 3 })),
+    branded: { ...brandPair(totals, 0.42), previous: brandPair(previous, 0.46), since: null },
     fetchedAt: iso(20 * 60_000),
   };
 }
@@ -120,6 +131,7 @@ const DIMENSION_LABELS: Record<SearchBreakdownDimension, string[]> = {
   page: PAGES,
   country: COUNTRIES,
   device: DEVICES,
+  searchAppearance: APPEARANCES,
 };
 
 export function demoSearchBreakdown(dimension: SearchBreakdownDimension, days = 28): SearchBreakdown {

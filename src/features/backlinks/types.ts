@@ -79,6 +79,7 @@ export type CompetitorProfile = {
 
 export type BacklinkOverview = {
   indexAvailable: boolean;
+  topPages?: { path: string; url: string; links: number; domains: number }[];
   summary: {
     total: number;
     live: number;

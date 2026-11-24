@@ -4,7 +4,7 @@ import { errMessage } from "@/shared/lib/notify";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchInsights } from "@/features/demo/demoSearchConsole";
-import type { SearchType } from "@/shared/types";
+import type { SearchFilter, SearchType } from "@/shared/types";
 import { buildActions } from "../insightActions";
 import { InsightsSummary } from "./InsightsSummary";
 import { InsightActionList } from "./InsightActionList";
@@ -21,6 +21,7 @@ export function SearchInsightsTab({
   siteId,
   days,
   type,
+  filters,
   onOpenQuery,
   onOpenPage,
 }: {
@@ -28,19 +29,20 @@ export function SearchInsightsTab({
   siteId: string;
   days: number;
   type: SearchType;
+  filters?: SearchFilter[];
   onOpenQuery: (query: string) => void;
   onOpenPage: (url: string) => void;
 }) {
   const ent = useSearchEntitlements();
   const locked = ent.insights === "none";
   const real = useGetSearchInsightsQuery(
-    { workspaceId, siteId, days, type },
+    { workspaceId, siteId, days, type, filters },
     { skip: locked },
   );
 
   const { demo } = useDemo();
   const sample = useMemo(() => (demo && !locked ? demoSearchInsights(days) : null), [demo, locked, days]);
-  const data = sample ?? real.data;
+  const data = sample ?? (real.error ? real.currentData : real.data);
   const isLoading = sample ? false : real.isLoading;
   const error = sample ? undefined : real.error;
 

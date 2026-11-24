@@ -60,10 +60,12 @@ export function SearchOverviewTab({
   explain,
   hasQueries = true,
   hourly,
+  branded,
 }: {
   data: SearchPerformance;
   hasQueries?: boolean;
   hourly?: ReactNode;
+  branded?: ReactNode;
   onViewQueries: () => void;
   onViewPages: () => void;
   onOpenQuery: (query: string) => void;
@@ -105,6 +107,8 @@ export function SearchOverviewTab({
       </section>
 
       {hourly}
+
+      {branded}
 
       <div className={classes.tables} data-single={!hasQueries || undefined}>
         {hasQueries && (

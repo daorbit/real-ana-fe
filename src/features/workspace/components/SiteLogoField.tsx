@@ -71,8 +71,8 @@ export function SiteLogoField({
         <div className={classes.text}>
           <span className={classes.hint}>
             {value
-              ? t("workspaces.siteLogoSet", "Click the logo to change it.")
-              : t("workspaces.siteLogoHint", "PNG, JPG, WebP or GIF up to 2 MB. Useful when your favicon doesn't show up.")}
+              ? t("workspaces.siteLogoSet", "Click the logo to change it. It's also your workspace logo unless Branding has its own.")
+              : t("workspaces.siteLogoHint", "PNG, JPG, WebP or GIF up to 2 MB. Also used as your workspace logo.")}
           </span>
           {value && !uploading && (
             <UnstyledButton className={classes.remove} onClick={() => onChange("")} disabled={disabled}>

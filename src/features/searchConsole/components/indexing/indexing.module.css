@@ -1,0 +1,53 @@
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+
+.headline > :first-child {
+  flex: 1 1 360px;
+}
+
+.run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.runText {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.reasonCell {
+  width: 100%;
+  min-width: 260px;
+}
+
+.hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: normal;
+  color: var(--text-2);
+}
+
+@media (max-width: 48em) {
+  .run {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -326,6 +326,58 @@ export function DevicesSkeleton() {
   );
 }
 
+export function VitalsSkeleton() {
+  return (
+    <Loading label="Loading Web vitals" className={layout.section}>
+      <div className={layout.headline}>
+        <div className={classes.stack}>
+          <Bone w="58%" h={18} shape="block" strong />
+          <Bone w="46%" h={11} />
+        </div>
+      </div>
+      <StatTilesSkeleton columns={5} />
+      <ChartCardSkeleton />
+      <TableCardSkeleton rows={6} columns={4} />
+    </Loading>
+  );
+}
+
+export function IndexingSkeleton() {
+  return (
+    <Loading label="Loading indexing" className={layout.section}>
+      <div className={layout.headline}>
+        <div className={classes.spread}>
+          <div className={`${classes.grow} ${classes.stack}`}>
+            <Bone w="52%" h={18} shape="block" strong />
+            <Bone w="70%" h={11} />
+          </div>
+          <Bone w={140} h={36} shape="block" strong />
+        </div>
+      </div>
+      <StatTilesSkeleton columns={4} />
+      <TableCardSkeleton rows={3} columns={2} />
+      <TableCardSkeleton rows={8} columns={5} />
+    </Loading>
+  );
+}
+
+export function LinksSkeleton() {
+  return (
+    <Loading label="Loading links" className={layout.section}>
+      <div className={classes.spread}>
+        <Bone w="46%" h={11} />
+        <Bone w={150} h={36} shape="block" />
+      </div>
+      <StatTilesSkeleton columns={5} />
+      <TableCardSkeleton rows={5} columns={2} />
+      <div className={layout.tables}>
+        <TableCardSkeleton rows={5} columns={2} />
+        <TableCardSkeleton rows={5} columns={2} />
+      </div>
+    </Loading>
+  );
+}
+
 export function SitemapsSkeleton() {
   return (
     <Loading label="Loading sitemaps" className={sitemaps.root}>

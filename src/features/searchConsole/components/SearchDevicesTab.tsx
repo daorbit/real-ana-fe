@@ -5,7 +5,7 @@ import { ErrorState } from "@/shared/ui/ErrorState";
 import { errMessage } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
-import type { SearchType } from "@/shared/types";
+import type { SearchFilter, SearchType } from "@/shared/types";
 import { DeviceShareDonut } from "./DeviceShareDonut";
 import { DeviceComparison } from "./DeviceComparison";
 import { DevicesSkeleton } from "./SearchSkeletons";
@@ -16,11 +16,13 @@ export function SearchDevicesTab({
   siteId,
   days,
   type,
+  filters,
 }: {
   workspaceId: string;
   siteId: string;
   days: number;
   type: SearchType;
+  filters?: SearchFilter[];
 }) {
   const real = useGetSearchBreakdownQuery({
     workspaceId,
@@ -28,6 +30,7 @@ export function SearchDevicesTab({
     dimension: "device",
     days,
     type,
+    filters,
     pageSize: 200,
   });
 

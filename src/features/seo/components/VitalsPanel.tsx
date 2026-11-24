@@ -1,4 +1,4 @@
-import type { SeoFieldVitals, SeoVitalSummary } from "@/shared/types";
+import type { SeoFieldVitals } from "@/shared/types";
 import { compact } from "@/shared/lib";
 import { SeoCard, SeoSection } from "@/features/seo/components/shared/SeoCard";
 import { Pill } from "@/features/seo/components/shared/Pill";
@@ -6,16 +6,9 @@ import { ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
 import { Tiles } from "@/features/seo/components/shared/Tile";
 import type { Tone } from "@/features/seo/components/shared/tone";
 import { VitalCard } from "@/features/seo/components/panels/performance/VitalCard";
-import { VITALS, formatVital } from "@/features/seo/components/panels/performance/vitalMeta";
+import { VITALS, VITAL_RATING, formatVital } from "@/features/seo/components/panels/performance/vitalMeta";
 import sharedClasses from "@/features/seo/components/shared/seoUi.module.css";
 import classes from "@/features/seo/components/panels/performance/performance.module.css";
-
-const RATING: Record<SeoVitalSummary["rating"], { tone: Tone; label: string }> = {
-  good: { tone: "good", label: "Passing" },
-  "needs-improvement": { tone: "warn", label: "Needs work" },
-  poor: { tone: "bad", label: "Failing" },
-  none: { tone: "neutral", label: "No data" },
-};
 
 function lcpTone(lcp: number | null): Tone {
   if (lcp === null) return "neutral";
@@ -51,7 +44,7 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
       <Tiles wide>
         {VITALS.map((v) => {
           const s = vitals.metrics[v.key];
-          const rating = RATING[s.rating];
+          const rating = VITAL_RATING[s.rating];
           return (
             <VitalCard
               key={v.key}

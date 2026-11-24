@@ -1,12 +1,9 @@
 import { Text } from "@mantine/core";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import type { SearchInspection } from "@/shared/types";
+import { humanizeCode } from "../searchAppearance";
 import { pagePath } from "../searchMetrics";
 import classes from "./pageDetail.module.css";
-
-function humanType(value: string) {
-  return value.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
-}
 
 function sameUrl(a: string, b: string) {
   return a.replace(/\/+$/, "").toLowerCase() === b.replace(/\/+$/, "").toLowerCase();
@@ -43,7 +40,7 @@ export function IndexInspectionDetails({ data }: { data: SearchInspection }) {
               {r.issues.length === 0 ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />}
               <div>
                 <Text size="xs" fw={600}>
-                  {humanType(r.type)}
+                  {humanizeCode(r.type)}
                   {r.items > 1 ? ` · ${r.items} items` : ""}
                 </Text>
                 {r.issues.slice(0, 3).map((issue) => (

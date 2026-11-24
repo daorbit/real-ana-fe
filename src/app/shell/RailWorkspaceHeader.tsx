@@ -82,7 +82,7 @@ export function RailWorkspaceHeader({ collapsed, title }: { collapsed: boolean; 
           className="rail-workspace"
           aria-label={t("nav.activeWorkspace")}
         >
-          <WorkspaceLogo className={classes.workspaceLogo} />
+          <WorkspaceLogo icon={active?.icon} className={classes.workspaceLogo} />
 
           {title ? (
             <div className="rail-workspace__text">

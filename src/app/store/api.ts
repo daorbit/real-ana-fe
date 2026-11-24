@@ -4,6 +4,7 @@ import { hasSession, isDemoSession } from "@/shared/lib/sessionHint";
 import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
 import { resolveDemoRequest, resolveDemoWrite } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
+import { filterParam } from "@/features/searchConsole/filterParam";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
   AdminUserPage, UserAudience, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
@@ -43,6 +44,7 @@ import type {
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   SearchBreakdown, SearchBreakdownDimension, SearchSitemaps, SearchInspection,
   SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown, SearchHourly,
+  SearchFilter, SearchVitalsDevice, SearchWebVitals, SearchPageVitals, SearchIndexing, SearchIndexCheckRun,
   NotificationPage, NotificationPrefsResponse, LiveAudience,
 } from "@/shared/types";
 
@@ -919,6 +921,7 @@ export const api = createApi({
       }),
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Site", id: `LIST-${workspaceId}` },
+        { type: "Branding", id: workspaceId },
         "Stats",
         "Workspace",
         "Usage",
@@ -967,8 +970,14 @@ export const api = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { workspaceId }) => [
+      invalidatesTags: (_r, _e, { workspaceId, logoUrl }) => [
         { type: "Site", id: `LIST-${workspaceId}` },
+        ...(logoUrl !== undefined
+          ? [
+              { type: "Workspace" as const, id: workspaceId },
+              { type: "Branding" as const, id: workspaceId },
+            ]
+          : []),
       ],
     }),
 
@@ -2221,6 +2230,7 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Branding", id: workspaceId },
         { type: "Workspace", id: workspaceId },
+        { type: "Site", id: `LIST-${workspaceId}` },
       ],
     }),
 
@@ -2997,11 +3007,11 @@ export const api = createApi({
 
     getSearchPerformance: build.query<
       SearchPerformance,
-      { workspaceId: string; siteId: string; days: number; type: SearchType }
+      { workspaceId: string; siteId: string; days: number; type: SearchType; filters?: SearchFilter[] }
     >({
-      query: ({ workspaceId, siteId, days, type }) => ({
+      query: ({ workspaceId, siteId, days, type, filters }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/performance`,
-        params: { days, type },
+        params: { days, type, ...filterParam(filters) },
       }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
@@ -3019,22 +3029,23 @@ export const api = createApi({
         sort?: SearchBreakdownSort;
         dir?: "asc" | "desc";
         q?: string;
+        filters?: SearchFilter[];
       }
     >({
-      query: ({ workspaceId, siteId, ...params }) => ({
+      query: ({ workspaceId, siteId, filters, ...params }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/breakdown`,
-        params,
+        params: { ...params, ...filterParam(filters) },
       }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
     getSearchInsights: build.query<
       SearchInsights,
-      { workspaceId: string; siteId: string; days: number; type: SearchType }
+      { workspaceId: string; siteId: string; days: number; type: SearchType; filters?: SearchFilter[] }
     >({
-      query: ({ workspaceId, siteId, days, type }) => ({
+      query: ({ workspaceId, siteId, days, type, filters }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/insights`,
-        params: { days, type },
+        params: { days, type, ...filterParam(filters) },
       }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
@@ -3048,11 +3059,12 @@ export const api = createApi({
         value: string;
         days: number;
         type: SearchType;
+        filters?: SearchFilter[];
       }
     >({
-      query: ({ workspaceId, siteId, ...params }) => ({
+      query: ({ workspaceId, siteId, filters, ...params }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/drilldown`,
-        params,
+        params: { ...params, ...filterParam(filters) },
       }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
@@ -3065,12 +3077,69 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
-    getSearchHourly: build.query<SearchHourly, { workspaceId: string; siteId: string; type: SearchType }>({
-      query: ({ workspaceId, siteId, type }) => ({
+    getSearchHourly: build.query<
+      SearchHourly,
+      { workspaceId: string; siteId: string; type: SearchType; filters?: SearchFilter[] }
+    >({
+      query: ({ workspaceId, siteId, type, filters }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/hourly`,
-        params: { type },
+        params: { type, ...filterParam(filters) },
       }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    getSearchWebVitals: build.query<
+      SearchWebVitals,
+      { workspaceId: string; siteId: string; device: SearchVitalsDevice }
+    >({
+      query: ({ workspaceId, siteId, device }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/vitals`,
+        params: { device },
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    getSearchPageVitals: build.query<
+      SearchPageVitals,
+      { workspaceId: string; siteId: string; device: SearchVitalsDevice }
+    >({
+      query: ({ workspaceId, siteId, device }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/vitals/pages`,
+        params: { device },
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    getSearchIndexing: build.query<SearchIndexing, { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/indexing`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    checkSearchIndexing: build.mutation<
+      SearchIndexCheckRun,
+      { workspaceId: string; siteId: string; count: number }
+    >({
+      query: ({ workspaceId, siteId, count }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/indexing/check`,
+        method: "POST",
+        body: { count },
+      }),
+      async onQueryStarted({ workspaceId, siteId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getSearchIndexing", { workspaceId, siteId }, (draft) => {
+              for (const { url, ...check } of data.checks) {
+                const page = draft.pages.find((p) => p.url === url);
+                if (page) page.check = check;
+              }
+            }),
+          );
+        } catch {
+          return;
+        }
+      },
     }),
 
     getSearchSitemaps: build.query<SearchSitemaps, { workspaceId: string; siteId: string }>({
@@ -3233,6 +3302,10 @@ export const {
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
   useGetSearchHourlyQuery,
+  useGetSearchWebVitalsQuery,
+  useGetSearchPageVitalsQuery,
+  useGetSearchIndexingQuery,
+  useCheckSearchIndexingMutation,
   useSubmitSearchSitemapMutation,
   useRemoveSearchSitemapMutation,
   useGetSearchInspectionQuery,

@@ -10,12 +10,14 @@ import { demoSearchPerformance } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import {
   SEARCH_CONSOLE_TABS,
+  appearanceText,
   countryText,
   pageText,
   queryText,
   renderCountry,
   renderPage,
   renderQuery,
+  tabHasFilters,
   type SearchConsoleTabId,
 } from "../searchConsoleTabs";
 import { useOpenSearchPage } from "../useOpenSearchPage";
@@ -31,12 +33,18 @@ import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import { SearchHourlyCard } from "./SearchHourlyCard";
+import { SearchBrandedCard, type BrandValue } from "./SearchBrandedCard";
+import { SearchFilterBar } from "./filters/SearchFilterBar";
+import { SearchIndexingTab } from "./indexing/SearchIndexingTab";
+import { SearchLinksTab } from "./links/SearchLinksTab";
+import { SearchVitalsTab } from "./vitals/SearchVitalsTab";
 import { typeHasQueries } from "../searchMetrics";
 import { SearchOrbitPanel } from "./SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
 import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
 import { useSearchOrbitChat } from "../useSearchOrbitChat";
 import { useSearchEntitlements } from "../useSearchEntitlements";
+import { useSearchFilters } from "../useSearchFilters";
 import classes from "./searchConsole.module.css";
 import { OverviewSkeleton } from "./SearchSkeletons";
 
@@ -57,6 +65,8 @@ export function SearchConsoleBody({
   const [days, setDays] = useState(() => Math.min(28, maxDays));
   const [type, setType] = useState<SearchType>("web");
   const [query, setQuery] = useState<string | null>(null);
+  const filterState = useSearchFilters(type);
+  const filters = filterState.request;
   const openPage = useOpenSearchPage(workspaceId, siteId, days, type);
   const orbitAvailable = Boolean(useOrbitOptional()?.chat.available);
   const [orbitOpen, setOrbitOpen] = useState(false);
@@ -64,7 +74,7 @@ export function SearchConsoleBody({
   const orbitChat = useSearchOrbitChat({ workspaceId, siteId, days, type });
 
   const realOverview = useGetSearchPerformanceQuery(
-    { workspaceId, siteId, days, type },
+    { workspaceId, siteId, days, type, filters },
     { skip: tab !== "overview" },
   );
 
@@ -72,9 +82,9 @@ export function SearchConsoleBody({
   const demoOverview = useMemo(() => (demo ? demoSearchPerformance(days, type) : null), [demo, days, type]);
   const overview = demoOverview
     ? { data: demoOverview, isFetching: false, error: undefined }
-    : realOverview;
+    : { ...realOverview, data: realOverview.error ? realOverview.currentData : realOverview.data };
 
-  const shared = { workspaceId, siteId, days, type };
+  const shared = { workspaceId, siteId, days, type, filters };
   const hasQueries = typeHasQueries(type);
   const tabs = SEARCH_CONSOLE_TABS.filter((t) => hasQueries || t.id !== "queries");
   const tabDef = tabs.find((t) => t.id === tab) ?? tabs[0];
@@ -83,6 +93,16 @@ export function SearchConsoleBody({
     setQuery(null);
     setOrbitOpen(true);
     orbitChat.send(askAboutQueryPrompt(text));
+  };
+
+  const openBrand = (value: BrandValue) => {
+    filterState.add({ dimension: "brandedClassification", operator: "equals", expression: value });
+    onTabChange("queries");
+  };
+
+  const openAppearance = (value: string) => {
+    filterState.add({ dimension: "searchAppearance", operator: "equals", expression: value });
+    onTabChange("pages");
   };
 
   const changeType = (next: SearchType) => {
@@ -132,6 +152,7 @@ export function SearchConsoleBody({
               Learn more
             </a>
           </p>
+          {tabHasFilters(tab) && !demo && <SearchFilterBar state={filterState} type={type} />}
         </div>
 
         <div
@@ -153,12 +174,17 @@ export function SearchConsoleBody({
               <SearchOverviewTab
                 data={overview.data}
                 hasQueries={hasQueries}
-                hourly={<SearchHourlyCard workspaceId={workspaceId} siteId={siteId} type={type} />}
+                hourly={<SearchHourlyCard workspaceId={workspaceId} siteId={siteId} type={type} filters={filters} />}
+                branded={
+                  overview.data.branded && (
+                    <SearchBrandedCard split={overview.data.branded} onOpen={demo ? undefined : openBrand} />
+                  )
+                }
                 onViewQueries={() => onTabChange("queries")}
                 onViewPages={() => onTabChange("pages")}
                 onOpenQuery={setQuery}
                 onOpenPage={openPage}
-                explain={explain}
+                explain={filters ? undefined : explain}
               />
             ) : (
               <OverviewSkeleton />
@@ -205,6 +231,38 @@ export function SearchConsoleBody({
           )}
 
           {tab === "devices" && <SearchDevicesTab {...shared} />}
+
+          {tab === "appearance" && (
+            <SearchBreakdownTab
+              {...shared}
+              dimension="searchAppearance"
+              title="Search appearance"
+              description={
+                demo
+                  ? "Plain blue links aren't listed; Google only reports special result types."
+                  : "Tap a result type to see the pages behind it. Plain blue links aren't listed."
+              }
+              labelHeader="Result type"
+              renderLabel={appearanceText}
+              searchLabel={appearanceText}
+              onOpenRow={demo ? undefined : (row) => openAppearance(row.key)}
+            />
+          )}
+
+          {tab === "vitals" && <SearchVitalsTab workspaceId={workspaceId} siteId={siteId} onOpenPage={openPage} />}
+
+          {tab === "indexing" && (
+            <SearchIndexingTab
+              workspaceId={workspaceId}
+              siteId={siteId}
+              propertyUrl={link.propertyUrl}
+              onOpenPage={openPage}
+            />
+          )}
+
+          {tab === "links" && (
+            <SearchLinksTab workspaceId={workspaceId} siteId={siteId} propertyUrl={link.propertyUrl} />
+          )}
 
           {tab === "sitemaps" && (
             <SearchSitemapsTab workspaceId={workspaceId} siteId={siteId} propertyUrl={link.propertyUrl} />

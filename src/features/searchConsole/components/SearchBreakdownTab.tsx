@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  Button, Group, Loader, ScrollArea, Table, Text, TextInput, UnstyledButton,
+  Group, Loader, ScrollArea, Table, TextInput, UnstyledButton,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
@@ -11,12 +11,13 @@ import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
 import type {
-  SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchType,
+  SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchFilter, SearchType,
 } from "@/shared/types";
 import { METRIC_BY_KEY } from "../searchMetrics";
 import { ClickDelta, PositionChip, ShareBar } from "./SearchCells";
 import { BreakdownSkeleton } from "./SearchSkeletons";
 import { SearchUpgradeNote } from "./SearchUpgradeNote";
+import { SearchPager } from "./SearchPager";
 import { SearchSectionHead } from "./SearchSectionHead";
 import { useSearchEntitlements } from "../useSearchEntitlements";
 import classes from "./searchConsole.module.css";
@@ -37,6 +38,7 @@ export function SearchBreakdownTab({
   renderLabel,
   searchLabel,
   onOpenRow,
+  filters,
 }: {
   workspaceId: string;
   siteId: string;
@@ -49,6 +51,7 @@ export function SearchBreakdownTab({
   renderLabel: (row: SearchBreakdownRow) => ReactNode;
   searchLabel?: (row: SearchBreakdownRow) => string;
   onOpenRow?: (row: SearchBreakdownRow) => void;
+  filters?: SearchFilter[];
 }) {
   const [filter, setFilter] = useState("");
   const [q] = useDebouncedValue(filter.trim(), 300);
@@ -58,7 +61,7 @@ export function SearchBreakdownTab({
   const hasSearchLabel = typeof searchLabel === "function";
   const ent = useSearchEntitlements();
 
-  useEffect(() => setPage(1), [q, sort, days, type, dimension]);
+  useEffect(() => setPage(1), [q, sort, days, type, dimension, filters]);
 
   const realBreakdown = useGetSearchBreakdownQuery({
     workspaceId,
@@ -71,6 +74,7 @@ export function SearchBreakdownTab({
     sort: sort.key,
     dir: sort.desc ? "desc" : "asc",
     q,
+    filters,
   });
 
   const { demo } = useDemo();
@@ -96,7 +100,7 @@ export function SearchBreakdownTab({
     };
   }, [demoFull, q, sort, page, pageSize]);
 
-  const data = demoBreakdown ?? realBreakdown.data;
+  const data = demoBreakdown ?? (realBreakdown.error ? realBreakdown.currentData : realBreakdown.data);
   const isLoading = demoBreakdown ? false : realBreakdown.isLoading;
   const isFetching = demoBreakdown ? false : realBreakdown.isFetching;
   const error = demoBreakdown ? undefined : realBreakdown.error;
@@ -115,7 +119,6 @@ export function SearchBreakdownTab({
   }
   if (!data) return null;
 
-  const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const maxClicks = Math.max(0, ...data.rows.map((r) => r.clicks));
   const offset = (data.page - 1) * data.pageSize;
   const showViews = dimension === "page" && ent.pageViews;
@@ -232,38 +235,7 @@ export function SearchBreakdownTab({
         </SearchUpgradeNote>
       ) : null}
 
-      {data.total > 0 && (
-        <Group justify="space-between" gap="sm" className={classes.pagerRow}>
-          <Text size="xs" c="dimmed">
-            {((data.page - 1) * data.pageSize + 1).toLocaleString()}–
-            {Math.min(data.page * data.pageSize, data.total).toLocaleString()} of {data.total.toLocaleString()}
-          </Text>
-          {pages > 1 && (
-            <Group gap={6} wrap="nowrap">
-              <Button
-                variant="default"
-                radius="xl"
-                size="compact-sm"
-                className={classes.pillButton}
-                disabled={data.page <= 1}
-                onClick={() => setPage(data.page - 1)}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="default"
-                radius="xl"
-                size="compact-sm"
-                className={classes.pillButton}
-                disabled={data.page >= pages}
-                onClick={() => setPage(data.page + 1)}
-              >
-                Next
-              </Button>
-            </Group>
-          )}
-        </Group>
-      )}
+      <SearchPager page={data.page} pageSize={data.pageSize} total={data.total} onChange={setPage} />
     </section>
   );
 }

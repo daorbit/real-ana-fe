@@ -22,6 +22,8 @@ const ALPHA3_TO_ALPHA2 = new Map(
   TABLE.split(",").map((pair) => pair.split(":") as [string, string]),
 );
 
+export const ALPHA3_CODES = [...ALPHA3_TO_ALPHA2.keys()];
+
 export function alpha3ToAlpha2(code: string): string {
   return ALPHA3_TO_ALPHA2.get(code.toUpperCase()) ?? "unknown";
 }

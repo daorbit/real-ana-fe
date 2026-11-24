@@ -250,6 +250,11 @@ export const demoCompetitorBacklinks: Record<string, CompetitorBacklink[]> = {
 
 export const demoBacklinkOverview: BacklinkOverview = {
   indexAvailable: true,
+  topPages: [
+    { path: "/", url: "https://acme.example/", links: 3, domains: 3 },
+    { path: "/pricing", url: "https://acme.example/pricing", links: 1, domains: 1 },
+    { path: "/blog/launch", url: "https://acme.example/blog/launch", links: 1, domains: 1 },
+  ],
   summary: {
     total: 7,
     live: 5,
