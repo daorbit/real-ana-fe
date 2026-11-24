@@ -506,6 +506,11 @@ body { overflow-wrap: break-word; }
   background-clip: padding-box;
 }
 
+:root .mantine-Button-root[data-variant="default"][data-disabled],
+:root .mantine-ActionIcon-root[data-variant="default"][data-disabled] {
+  background-clip: padding-box;
+}
+
 .mantine-Button-section[data-position="left"] {
   margin-inline-end: 7px;
 }

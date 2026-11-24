@@ -82,7 +82,7 @@ export function SearchConsoleBody({
   const demoOverview = useMemo(() => (demo ? demoSearchPerformance(days, type) : null), [demo, days, type]);
   const overview = demoOverview
     ? { data: demoOverview, isFetching: false, error: undefined }
-    : { ...realOverview, data: realOverview.error ? realOverview.currentData : realOverview.data };
+    : { ...realOverview, data: realOverview.currentData };
 
   const shared = { workspaceId, siteId, days, type, filters };
   const hasQueries = typeHasQueries(type);
@@ -162,7 +162,7 @@ export function SearchConsoleBody({
           className={classes.panel}
         >
           {tab === "overview" &&
-            (overview.error && !overview.data ? (
+            (overview.error && !overview.data && !overview.isFetching ? (
               <ErrorState
                 compact
                 title="Couldn't load from Google"

@@ -15,14 +15,7 @@ export function SearchPager({
   if (!total) return null;
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const step = (label: string, next: number, disabled: boolean) => (
-    <Button
-      variant="default"
-      radius="xl"
-      size="compact-sm"
-      className={classes.pillButton}
-      disabled={disabled}
-      onClick={() => onChange(next)}
-    >
+    <Button variant="default" size="xs" radius={10} disabled={disabled} onClick={() => onChange(next)}>
       {label}
     </Button>
   );

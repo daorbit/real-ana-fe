@@ -60,7 +60,7 @@ export default function SearchConsole() {
       <AppShell>
         <SearchPageHeader />
         {loading || sitesLoading ? (
-          <ConsoleSkeleton />
+          <ConsoleSkeleton tab={tab} />
         ) : !site && !(sitesFailed && !sites.length) ? (
           <SearchStartPanel canEdit={canEdit} />
         ) : (
@@ -72,7 +72,7 @@ export default function SearchConsole() {
 
   return (
     <AppShell>
-      <SearchConsoleGate workspaceId={workspaceId} siteId={site.siteId} header={<SearchPageHeader />}>
+      <SearchConsoleGate workspaceId={workspaceId} siteId={site.siteId} header={<SearchPageHeader />} tab={tab}>
         {(link) => (
           <SearchConsoleBody
             key={site.siteId}

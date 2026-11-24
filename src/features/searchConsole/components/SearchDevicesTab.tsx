@@ -36,8 +36,8 @@ export function SearchDevicesTab({
 
   const { demo } = useDemo();
   const sample = useMemo(() => (demo ? demoSearchBreakdown("device", days) : null), [demo, days]);
-  const data = sample ?? real.data;
-  const isLoading = sample ? false : real.isLoading;
+  const data = sample ?? real.currentData;
+  const isLoading = !data && real.isFetching;
   const error = sample ? undefined : real.error;
 
   if (isLoading) return <DevicesSkeleton />;

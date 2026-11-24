@@ -101,11 +101,17 @@ export function SearchBreakdownTab({
   }, [demoFull, q, sort, page, pageSize]);
 
   const data = demoBreakdown ?? (realBreakdown.error ? realBreakdown.currentData : realBreakdown.data);
-  const isLoading = demoBreakdown ? false : realBreakdown.isLoading;
+  const scope = JSON.stringify([dimension, days, type, filters]);
+  const [shownScope, setShownScope] = useState("");
+  const hasCurrent = Boolean(realBreakdown.currentData);
+  useEffect(() => {
+    if (hasCurrent) setShownScope(scope);
+  }, [hasCurrent, scope]);
+  const isLoading = !demoBreakdown && realBreakdown.isFetching && !hasCurrent && shownScope !== scope;
   const isFetching = demoBreakdown ? false : realBreakdown.isFetching;
   const error = demoBreakdown ? undefined : realBreakdown.error;
 
-  if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page" && ent.pageViews} />;
+  if (isLoading) return <BreakdownSkeleton showViews={dimension === "page" && ent.pageViews} chevron={Boolean(onOpenRow)} />;
   if (error && !data) {
     return (
       <ErrorState

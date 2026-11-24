@@ -1,5 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
-import { SegmentedControl, Skeleton, Text } from "@mantine/core";
+import { SegmentedControl, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { compact } from "@/shared/lib";
@@ -9,6 +9,7 @@ import { demoSearchHourly } from "@/features/demo/demoSearchConsole";
 import type { SearchFilter, SearchHourly, SearchMetrics, SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange } from "../searchMetrics";
 import { SearchCardHead } from "./SearchSectionHead";
+import { HourlyBodySkeleton } from "./SearchSkeletons";
 import classes from "./searchConsole.module.css";
 import h from "./hourly.module.css";
 
@@ -78,8 +79,8 @@ export function SearchHourlyCard({
   const real = useGetSearchHourlyQuery({ workspaceId, siteId, type, filters });
   const { demo } = useDemo();
   const sample = useMemo(() => (demo ? demoSearchHourly(type) : null), [demo, type]);
-  const data = sample ?? real.data;
-  const isLoading = sample ? false : real.isLoading;
+  const data = sample ?? real.currentData;
+  const isLoading = !data && real.isFetching;
   const error = sample ? undefined : real.error;
   const color = METRIC_BY_KEY[metric].color;
 
@@ -105,7 +106,7 @@ export function SearchHourlyCard({
       />
 
       {isLoading ? (
-        <Skeleton height={260} radius="md" />
+        <HourlyBodySkeleton />
       ) : error || !data ? (
         <Text className={h.empty}>Hourly data isn&apos;t available for this property or search type yet.</Text>
       ) : points.length === 0 ? (

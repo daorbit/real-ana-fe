@@ -1,11 +1,13 @@
 import { Skeleton } from "@mantine/core";
+import classes from "./skeleton.module.css";
 
-const RADIUS = { line: "sm", block: "md", tile: "sm", pill: "xl", circle: "xl" } as const;
+const RADIUS = { line: 6, block: 8, tile: 4, pill: 7, circle: "xl" } as const;
 
 export function Bone({
   w = "100%",
   h = 10,
   shape = "line",
+  strong = false,
   className,
 }: {
   w?: number | string;
@@ -19,8 +21,8 @@ export function Bone({
       width={w}
       height={h}
       radius={RADIUS[shape]}
-      circle={shape === "circle" && w === h}
-      className={className}
+      className={`${classes.bone} ${className ?? ""}`}
+      data-strong={strong || undefined}
       aria-hidden
     />
   );

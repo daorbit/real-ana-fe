@@ -17,7 +17,9 @@ export function IndexRichResults({ groups }: { groups: RichResultGroup[] }) {
         label: group.label,
         values: [
           group.pages.toLocaleString(),
-          group.withIssues ? <Pill tone="warn">{group.withIssues.toLocaleString()}</Pill> : <Pill tone="good">None</Pill>,
+          <Pill key="issues" tone={group.withIssues ? "warn" : "good"}>
+            {group.withIssues ? group.withIssues.toLocaleString() : "None"}
+          </Pill>,
         ],
       }))}
     />

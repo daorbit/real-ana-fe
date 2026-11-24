@@ -57,7 +57,7 @@ export function VitalPagesTable({
         retrying={real.isFetching}
       />
     ) : (
-      <TableCardSkeleton rows={6} columns={4} />
+      <TableCardSkeleton columns={["num", "pill", "pill", "pill", "pill"]} />
     );
   }
   if (data.status !== "ready" || !data.pages.length) return null;

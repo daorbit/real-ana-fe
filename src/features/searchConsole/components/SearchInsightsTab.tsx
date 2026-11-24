@@ -42,8 +42,8 @@ export function SearchInsightsTab({
 
   const { demo } = useDemo();
   const sample = useMemo(() => (demo && !locked ? demoSearchInsights(days) : null), [demo, locked, days]);
-  const data = sample ?? (real.error ? real.currentData : real.data);
-  const isLoading = sample ? false : real.isLoading;
+  const data = sample ?? real.currentData;
+  const isLoading = !data && real.isFetching;
   const error = sample ? undefined : real.error;
 
   if (locked) {

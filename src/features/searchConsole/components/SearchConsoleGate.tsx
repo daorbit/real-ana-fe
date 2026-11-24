@@ -14,6 +14,7 @@ import { demoSearchConsoleStatus, DEMO_PROPERTY_URL } from "@/features/demo/demo
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
 import { ConsoleSkeleton } from "./SearchSkeletons";
+import type { SearchConsoleTabId } from "../searchConsoleTabs";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 
 export type SearchConsoleLink = {
@@ -27,11 +28,13 @@ export function SearchConsoleGate({
   workspaceId,
   siteId,
   header,
+  tab,
   children,
 }: {
   workspaceId: string;
   siteId: string;
   header?: ReactNode;
+  tab?: SearchConsoleTabId;
   children: (link: SearchConsoleLink) => ReactNode;
 }) {
   const framed = (node: ReactNode) => (
@@ -60,7 +63,7 @@ export function SearchConsoleGate({
     return <>{children({ propertyUrl: DEMO_PROPERTY_URL, googleEmail: sample.connection!.googleEmail })}</>;
   }
 
-  if (isLoading) return framed(<ConsoleSkeleton />);
+  if (isLoading) return framed(<ConsoleSkeleton tab={tab} />);
   if (!status) return framed(null);
 
   if (!status.configured) return framed(<SearchConsoleConnectCard variant="not-configured" />);
