@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Button, TextInput } from "@mantine/core";
-import { LogOut, Search } from "lucide-react";
+import { Button } from "@mantine/core";
+import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/context";
@@ -17,7 +17,6 @@ import { usePickerShortcuts } from "./usePickerShortcuts";
 import classes from "./WorkspacePicker.module.css";
 
 const NEW_WORKSPACE_PATH = "/app/onboarding?mode=workspace";
-const SEARCH_FROM = 9;
 const NO_IDS: string[] = [];
 
 export default function WorkspacePicker() {
@@ -26,21 +25,11 @@ export default function WorkspacePicker() {
   const { user, logout } = useAuth();
   const { workspaces } = useWorkspace();
   const { picked, pickingId, pick } = usePickTransition();
-  const [query, setQuery] = useState("");
   const [lastId] = useState(readLastWorkspace);
 
   const ordered = useMemo(() => lastUsedFirst(workspaces, lastId), [workspaces, lastId]);
   const ids = useMemo(() => ordered.map((w) => w._id), [ordered]);
   usePickerShortcuts(picked ? NO_IDS : ids, pick);
-
-  const q = query.trim().toLowerCase();
-  const shown = useMemo(
-    () =>
-      ordered
-        .map((w, index) => ({ w, index }))
-        .filter(({ w }) => !q || w.name.toLowerCase().includes(q)),
-    [ordered, q],
-  );
 
   if (picked) {
     return (
@@ -75,20 +64,8 @@ export default function WorkspacePicker() {
         <PickerProfile />
         <h1 className={classes.title}>{t("workspaces.picker.title")}</h1>
 
-        {workspaces.length >= SEARCH_FROM && (
-          <TextInput
-            className={classes.search}
-            radius="xl"
-            leftSection={<Search size={15} />}
-            placeholder={t("workspaces.picker.search")}
-            aria-label={t("workspaces.picker.search")}
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-          />
-        )}
-
         <div className={classes.grid}>
-          {shown.map(({ w }) => (
+          {ordered.map((w) => (
             <WorkspaceTile
               key={w._id}
               name={w.name}
@@ -98,17 +75,11 @@ export default function WorkspacePicker() {
               onClick={() => pick(w._id)}
             />
           ))}
-          {!q && (
-            <NewWorkspaceTile
-              label={t("workspaces.newWorkspace")}
-              onClick={() => nav(NEW_WORKSPACE_PATH)}
-            />
-          )}
+          <NewWorkspaceTile
+            label={t("workspaces.newWorkspace")}
+            onClick={() => nav(NEW_WORKSPACE_PATH)}
+          />
         </div>
-
-        {q && shown.length === 0 && (
-          <p className={classes.empty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
-        )}
       </main>
     </div>
   );

@@ -1,0 +1,11 @@
+span.fallback {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.fallback svg {
+  width: 58%;
+  height: 58%;
+}

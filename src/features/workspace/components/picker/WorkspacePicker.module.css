@@ -74,11 +74,6 @@
   animation: pickerIn 360ms ease-out 60ms both;
 }
 
-.search {
-  width: min(360px, 100%);
-  margin-top: 28px;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 140px);
@@ -123,7 +118,7 @@
   height: 88px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 22px;
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
   transition: background-color 160ms ease;
@@ -246,12 +241,6 @@
 .tile:focus-visible .name,
 .tile[data-last] .name {
   color: var(--text);
-}
-
-.empty {
-  margin: 8px 0 0;
-  font-size: 14px;
-  color: var(--muted);
 }
 
 @keyframes pickerIn {

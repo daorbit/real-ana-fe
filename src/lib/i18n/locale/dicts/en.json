@@ -1070,7 +1070,6 @@
       "open": "Choose workspace",
       "signOut": "Sign out",
       "lastUsed": "Last used",
-      "search": "Find a workspace",
       "noMatch": "No workspace matches “{{query}}”",
       "greeting": "Welcome back, {{name}}",
       "greetingNoName": "Welcome back",
