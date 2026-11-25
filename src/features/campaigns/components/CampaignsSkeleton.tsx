@@ -1,22 +1,8 @@
-import { Skeleton } from "@mantine/core";
-import { PanelSkeleton } from "@/shared/ui/Skeletons";
-import classes from "./Campaigns.module.css";
-import cards from "./CampaignCard.module.css";
+import { Bricks } from "@/shared/ui/Bricks";
+import type { BrickRow } from "@/shared/lib/brickRows";
 
-const CARDS = [0, 1, 2];
+const ROWS: BrickRow[] = [{ height: 112 }, { height: 290, cols: 3 }];
 
 export function CampaignsSkeleton() {
-  return (
-    <div className={classes.page} aria-busy>
-      <PanelSkeleton height={112} />
-      <div className={classes.stack}>
-        <Skeleton height={34} width={280} radius="md" />
-        <div className={cards.grid}>
-          {CARDS.map((key) => (
-            <PanelSkeleton key={key} height={290} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  return <Bricks rows={ROWS} label="Loading campaigns" />;
 }

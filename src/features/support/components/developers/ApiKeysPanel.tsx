@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
-import { Button, Skeleton, Stack, Text, TextInput } from "@mantine/core";
+import { Box, Button, Text, TextInput } from "@mantine/core";
 import { KeyRound, Plus, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
+import { Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import type { ApiKey, ApiKeyUsageWindow } from "@/shared/types";
 import { useApiKeys } from "../../hooks/useApiKeys";
 import { useKeyUsage } from "../../hooks/useKeyUsage";
@@ -13,6 +15,8 @@ import { RenameKeyModal } from "./RenameKeyModal";
 import { RevealKeyModal } from "./RevealKeyModal";
 import { SectionHeader } from "./SectionHeader";
 import classes from "./Developers.module.css";
+
+const LOADING_ROWS = brickRows(3, 44);
 
 interface Props {
   workspaceId: string;
@@ -66,11 +70,9 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, onViewUsa
 
       <div className={classes.card}>
         {isLoading ? (
-          <Stack gap="xs" p="md">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} height={36} radius="sm" />
-            ))}
-          </Stack>
+          <Box p="md">
+            <Bricks rows={LOADING_ROWS} label="Loading API keys" />
+          </Box>
         ) : loadFailed ? (
           <ErrorState compact title={t("developers.loadError")} onRetry={() => void retry()} retrying={retrying} />
         ) : keys.length === 0 ? (

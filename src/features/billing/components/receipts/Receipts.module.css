@@ -86,11 +86,6 @@
   min-width: 0;
 }
 
-.skelEnd {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .description {
   overflow: hidden;
   font-size: 13px;

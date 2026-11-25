@@ -3737,15 +3737,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 :root .mantine-Skeleton-root {
-  --skeleton-base: color-mix(in srgb, var(--text) 9%, var(--surface));
-  --skeleton-sheen: color-mix(in srgb, var(--mantine-color-white) 9%, transparent);
+  --skeleton-base: color-mix(in srgb, var(--text) 8%, var(--surface));
+  --skeleton-sheen: color-mix(in srgb, var(--text) 7%, transparent);
   transform: none;
   -webkit-transform: none;
 }
 
 [data-mantine-color-scheme="light"] .mantine-Skeleton-root {
-  --skeleton-base: color-mix(in srgb, var(--text) 7%, var(--surface));
-  --skeleton-sheen: color-mix(in srgb, var(--mantine-color-white) 70%, transparent);
+  --skeleton-base: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --skeleton-sheen: color-mix(in srgb, var(--text) 5%, transparent);
 }
 
 :root .mantine-Skeleton-root[data-visible] {
@@ -3757,7 +3757,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 :root .mantine-Skeleton-root[data-visible]::after {
-  background: linear-gradient(90deg, transparent 0%, var(--skeleton-sheen) 50%, transparent 100%);
+  background: linear-gradient(100deg, transparent 10%, var(--skeleton-sheen) 50%, transparent 90%);
   opacity: 0;
   transform: translateX(-100%);
   animation: none;
@@ -3765,7 +3765,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 :root .mantine-Skeleton-root[data-visible][data-animate]::after {
   opacity: 1;
-  animation: skeleton-sweep 1.5s ease-in-out infinite;
+  animation: skeleton-sweep 1.8s ease-in-out infinite;
 }
 
 @keyframes skeleton-sweep {

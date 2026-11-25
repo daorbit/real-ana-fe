@@ -273,36 +273,6 @@
   background: var(--surface);
 }
 
-.skelIcon {
-  grid-area: icon;
-  align-self: start;
-}
-
-.skelTrack {
-  grid-area: track;
-}
-
-.skelLines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.skelBars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 16px;
-  padding-left: 48px;
-}
-
-.skelRows {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .chartBody {
   height: 240px;
 }

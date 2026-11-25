@@ -8,7 +8,11 @@ import {
 } from "lucide-react";
 import type { useOrbitChat } from "@/features/orbit/useOrbitChat";
 import { formatDate } from "@/shared/lib/format";
+import { Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import classes from "./orbitPage.module.css";
+
+const LOADING_ROWS = brickRows(6, 48);
 
 
 
@@ -338,17 +342,7 @@ export function OrbitHistoryDrawer({
 
       <ScrollArea className={classes.drawerList} type="hover" scrollbarSize={6}>
         {loadingConversations ? (
-          <Stack gap={0}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={classes.threadSkeleton}>
-                <div className={classes.threadSkeletonIcon} />
-                <div className={classes.threadSkeletonLines}>
-                  <div className={classes.threadSkeletonLine} />
-                  <div className={classes.threadSkeletonLine} data-w="short" />
-                </div>
-              </div>
-            ))}
-          </Stack>
+          <Bricks rows={LOADING_ROWS} label="Loading threads" />
         ) : !conversations.length ? (
           <Text size="xs" c="dimmed" lh={1.5} px={10} py={6}>
             Threads you start are saved here for everyone in this workspace.

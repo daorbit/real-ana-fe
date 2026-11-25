@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { Lock, SearchX, StickyNote } from "lucide-react";
 import { NoteListItem } from "@/features/notes/components/NoteListItem";
 import { NoteSearch } from "@/features/notes/components/NoteSearch";
@@ -8,7 +8,11 @@ import { PanelControls } from "@/features/notes/components/PanelControls";
 import { groupNotes } from "@/features/notes/noteDates";
 import { matchesNote } from "@/features/notes/noteText";
 import type { Note } from "@/features/notes/types";
+import { Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import classes from "@/features/notes/components/Notes.module.css";
+
+const LOADING_ROWS = brickRows(3, 64);
 
 function byRecent(a: Note, b: Note) {
   return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
@@ -67,16 +71,7 @@ export function NoteList({
         </div>
       ) : (
         <div className={classes.list}>
-          {loading && (
-            <div className={classes.card}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} className={classes.skeletonRow}>
-                  <Skeleton height={12} width="55%" radius="sm" />
-                  <Skeleton height={10} width="80%" radius="sm" mt={8} />
-                </div>
-              ))}
-            </div>
-          )}
+          {loading && <Bricks rows={LOADING_ROWS} label="Loading notes" />}
 
           {noMatch && (
             <div className={classes.empty}>

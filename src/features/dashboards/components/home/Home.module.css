@@ -787,80 +787,6 @@
   }
 }
 
-.skeletonCard {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.skeletonBody {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 18px;
-}
-
-.skeletonLines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.skeletonInline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.skeletonPreview {
-  height: 180px;
-  padding: 20px 20px 0;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
-}
-
-.skeletonWindow {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  height: 100%;
-  padding: 34px 10px 10px;
-  border: 1px solid var(--border);
-  border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  background: var(--bg);
-}
-
-.skeletonKpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.skeletonFoot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding: 13px 18px;
-  border-top: 1px solid var(--border);
-}
-
-.skeletonNew {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 260px;
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-lg);
-}
-
 @media (max-width: 900px) {
   .librarySearch {
     width: 100%;
@@ -873,10 +799,6 @@
 
   .librarySort {
     flex: 1;
-  }
-
-  .skeletonInline {
-    display: none;
   }
 
 

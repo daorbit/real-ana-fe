@@ -29,6 +29,7 @@ import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { notify } from "@/shared/lib/notify";
+import { Brick } from "@/shared/ui/Bricks";
 import { fitsWithAttachment } from "../attachmentSize";
 import classes from "./orbitPage.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -169,7 +170,7 @@ function GeneratedImage({ url }: { url: string }) {
 
   return (
     <div className={classes.generatedImageWrap}>
-      {!loaded && <div className={classes.generatedImageSkeleton} />}
+      {!loaded && <Brick height="auto" className={classes.generatedImageSkeleton} />}
       <img
         src={url}
         alt="Generated"

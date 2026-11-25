@@ -155,20 +155,6 @@
   color: var(--text);
 }
 
-.skeletonRows {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px var(--audit-pad, 0) 20px;
-  border-top: 1px solid var(--border);
-}
-
-.skeletonRow {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
 .technicalList {
   margin: 0;
   padding: 0 var(--audit-pad, 0) 14px;
@@ -189,7 +175,8 @@
 }
 
 @media (max-width: 61.99em) {
-  .inspector {
+  .inspector,
+  .inspectorSkeleton {
     display: none;
   }
 }

@@ -1,70 +1,30 @@
-import { Skeleton } from "@mantine/core";
+import { Brick, Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import classes from "./Tasks.module.css";
 
-const COLUMNS = [
-  [96, 132, 78],
-  [118, 84],
-  [140, 96, 110],
-  [88],
-  [104, 126],
-];
-
-function CardSkeleton({ height }: { height: number }) {
-  return (
-    <div className={classes.skeletonCard}>
-      <div className={classes.cardBody}>
-        <Skeleton height={14} width="38%" radius="sm" />
-        <div className={classes.titleRow}>
-          <Skeleton height={18} width={18} circle />
-          <div className={classes.skeletonLines}>
-            <Skeleton height={12} radius="sm" />
-            {height > 100 && <Skeleton height={12} width="70%" radius="sm" />}
-          </div>
-        </div>
-      </div>
-      <div className={classes.cardFoot}>
-        <Skeleton height={22} width={58} radius="sm" />
-        <span className={classes.footEnd}>
-          <Skeleton height={26} width={26} circle />
-        </span>
-      </div>
-    </div>
-  );
-}
+const COLUMNS = [[132, 168, 112], [150, 120], [168, 132, 140], [124], [140, 160]];
+const TOOLBAR = brickRows(1, 40);
 
 export function TasksSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading tasks">
+    <>
       <div className={classes.toolbar}>
-        <Skeleton height={36} width={240} radius="md" />
-        <div className={classes.skeletonPeople}>
-          <Skeleton height={28} width={28} circle />
-          <Skeleton height={28} width={28} circle />
-          <Skeleton height={28} width={28} circle />
-        </div>
-        <span className={classes.spacer} />
-        <Skeleton height={36} width={168} radius="md" />
-        <Skeleton height={36} width={236} radius="md" />
+        <Bricks rows={TOOLBAR} label="Loading tasks" />
       </div>
-      <div className={classes.boardScroll}>
+      <div className={classes.boardScroll} aria-hidden>
         <div className={classes.board}>
           {COLUMNS.map((cards, i) => (
             <div key={i} className={`${classes.column} ${classes.skeletonColumn}`}>
-              <div className={classes.columnHead}>
-                <Skeleton height={16} width={110} radius="sm" />
-              </div>
-              <div className={classes.skeletonAdd}>
-                <Skeleton height={12} width={80} radius="sm" />
-              </div>
+              <Brick height={40} />
               <div className={classes.cards}>
-                {cards.map((h, j) => (
-                  <CardSkeleton key={j} height={h} />
+                {cards.map((height, j) => (
+                  <Brick key={j} height={height} className={classes.skeletonCard} />
                 ))}
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

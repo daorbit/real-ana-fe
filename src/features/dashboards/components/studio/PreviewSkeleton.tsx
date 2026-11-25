@@ -1,18 +1,8 @@
-import { StatCardSkeleton, ChartSkeleton, ListSkeleton, PanelSkeleton } from "@/shared/ui/Skeletons";
-import classes from "@/features/dashboards/components/studio/Studio.module.css";
+import { Bricks } from "@/shared/ui/Bricks";
+import type { BrickRow } from "@/shared/lib/brickRows";
+
+const ROWS: BrickRow[] = [{ height: 130, cols: 4 }, { height: 300, split: "lead" }, { height: 220, cols: 2 }];
 
 export function PreviewSkeleton() {
-  return (
-    <div className={classes.skeletonGrid} aria-hidden>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <StatCardSkeleton key={i} spark={false} />
-      ))}
-      <div className={classes.skWide}>
-        <ChartSkeleton height={190} />
-      </div>
-      <ListSkeleton rows={4} aside={false} />
-      <PanelSkeleton className={classes.skHalf} height={240} />
-      <PanelSkeleton className={classes.skHalf} height={240} />
-    </div>
-  );
+  return <Bricks rows={ROWS} label="Loading preview" />;
 }

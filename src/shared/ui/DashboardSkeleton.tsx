@@ -1,46 +1,14 @@
-import { Grid, SimpleGrid, Skeleton, Stack } from "@mantine/core";
-import { ChartSkeleton, ListSkeleton, StatCardSkeleton } from "@/shared/ui/Skeletons";
-import classes from "./DashboardSkeleton.module.css";
+import { Bricks } from "@/shared/ui/Bricks";
+import type { BrickRow } from "@/shared/lib/brickRows";
 
-const SMALL_CARDS = 4;
-const HERO_TOTALS = 3;
+const ROWS: BrickRow[] = [
+  { height: 150, cols: 4 },
+  { height: 340, split: "lead" },
+  { height: 220, cols: 3 },
+];
 
-function HeroSkeleton() {
-  return (
-    <div className={classes.hero}>
-      <div>
-        <Skeleton height={10} width={90} radius="sm" />
-        <Skeleton height={48} width={120} mt={16} radius={10} />
-      </div>
-      <div className={classes.totals}>
-        {Array.from({ length: HERO_TOTALS }, (_, i) => (
-          <div key={i}>
-            <Skeleton height={9} width={84} radius="sm" />
-            <Skeleton height={22} width={64} mt={10} radius={6} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+const ROWS_WITH_HERO: BrickRow[] = [{ height: 150 }, ...ROWS];
 
 export function DashboardSkeleton({ hero = false }: { hero?: boolean }) {
-  return (
-    <Stack gap="lg" aria-busy="true" aria-label="Loading">
-      {hero && <HeroSkeleton />}
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: SMALL_CARDS }} spacing="lg">
-        {Array.from({ length: SMALL_CARDS }, (_, i) => (
-          <StatCardSkeleton key={i} />
-        ))}
-      </SimpleGrid>
-      <Grid gap="lg">
-        <Grid.Col span={{ base: 12, lg: 8 }}>
-          <ChartSkeleton height={240} />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, lg: 4 }}>
-          <ListSkeleton rows={5} aside={false} />
-        </Grid.Col>
-      </Grid>
-    </Stack>
-  );
+  return <Bricks rows={hero ? ROWS_WITH_HERO : ROWS} />;
 }

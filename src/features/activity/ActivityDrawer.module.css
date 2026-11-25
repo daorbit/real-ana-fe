@@ -245,25 +245,6 @@
   padding: 14px 8px;
 }
 
-.skeletonLabel {
-  margin: 4px 10px 10px;
-}
-
-.skeletonRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px;
-}
-
-.skeletonLines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 7px;
-  padding-top: 2px;
-}
-
 @media (max-width: 48em) {
   .overlay {
     background: color-mix(in srgb, #000 45%, transparent);

@@ -780,14 +780,6 @@
   width: min(520px, 100%);
 }
 
-.skelLines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-}
-
 @media (max-width: 75em) {
   .summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));

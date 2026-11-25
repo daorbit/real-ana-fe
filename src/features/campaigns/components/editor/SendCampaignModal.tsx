@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Checkbox, Group, Modal, Skeleton, Stack, Text } from "@mantine/core";
+import { Button, Checkbox, Group, Modal, Stack, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
+import { Brick } from "@/shared/ui/Bricks";
 import { notify, notifyError } from "@/shared/lib/notify";
 import { useCheckCampaignAudienceMutation, useSendCampaignMutation } from "@/features/campaigns/api";
 
@@ -40,7 +41,7 @@ export function SendCampaignModal({ workspaceId, campaignId, onClose }: Props) {
     <Modal opened={Boolean(campaignId)} onClose={onClose} title="Send this campaign?" centered>
       <Stack gap="md">
         {checkState.isLoading || !audience ? (
-          <Skeleton height={60} radius="md" />
+          <Brick height={60} />
         ) : (
           <Text size="sm">
             This goes to <b>{audience.total.toLocaleString()}</b> {audience.total === 1 ? "person" : "people"}

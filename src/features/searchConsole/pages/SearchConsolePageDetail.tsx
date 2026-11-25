@@ -205,7 +205,7 @@ export default function SearchConsolePageDetail() {
             onOpenRow={(row) => setQuery(row.key)}
           />
         ) : (
-          !error && <TableCardSkeleton columns={["shareSmall", "num", "num", "pill"]} />
+          !error && <TableCardSkeleton />
         )}
       </Stack>
 

@@ -335,28 +335,6 @@
   color: var(--amber);
 }
 
-.skelLines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-}
-
-.skelStack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.skelRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-}
-
 @media (max-width: 62em) {
   .overview,
   .workspace {

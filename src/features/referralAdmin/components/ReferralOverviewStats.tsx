@@ -1,7 +1,8 @@
-import { Progress, Skeleton } from "@mantine/core";
+import { Progress } from "@mantine/core";
 import { Clock, Flag, KeyRound, Ticket } from "lucide-react";
 import { useGetAdminReferralOverviewQuery } from "@/app/store";
 import { num } from "@/shared/lib";
+import { Brick } from "@/shared/ui/Bricks";
 import classes from "./ReferralAdmin.module.css";
 
 function pct(part: number, whole: number) {
@@ -14,8 +15,8 @@ export function ReferralOverviewStats() {
   if (!data) {
     return (
       <div className={classes.overview}>
-        <Skeleton h={190} radius="lg" />
-        <Skeleton h={190} radius="lg" />
+        <Brick height={190} />
+        <Brick height={190} />
       </div>
     );
   }

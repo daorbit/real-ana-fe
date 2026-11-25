@@ -1,5 +1,5 @@
-import { Skeleton } from "@mantine/core";
+import { Brick } from "@/shared/ui/Bricks";
 
 export function WidgetSkeleton({ bare = false }: { bare?: boolean }) {
-  return <Skeleton height={bare ? 96 : 220} radius="lg" />;
+  return <Brick height={bare ? 96 : 220} />;
 }

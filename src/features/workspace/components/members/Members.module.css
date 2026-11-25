@@ -390,14 +390,6 @@
   padding-top: 4px;
 }
 
-.skelMember {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
 @media (max-width: 48em) {
   .overview {
     padding: 20px;

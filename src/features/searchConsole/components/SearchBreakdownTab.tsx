@@ -111,7 +111,7 @@ export function SearchBreakdownTab({
   const isFetching = demoBreakdown ? false : realBreakdown.isFetching;
   const error = demoBreakdown ? undefined : realBreakdown.error;
 
-  if (isLoading) return <BreakdownSkeleton showViews={dimension === "page" && ent.pageViews} chevron={Boolean(onOpenRow)} />;
+  if (isLoading) return <BreakdownSkeleton />;
   if (error && !data) {
     return (
       <ErrorState

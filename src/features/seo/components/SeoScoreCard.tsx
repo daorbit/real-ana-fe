@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Card, Center, Progress, Skeleton, Text } from "@mantine/core";
+import { Badge, Button, Card, Progress, Text } from "@mantine/core";
 import { ArrowUpRight, Search, Gauge as GaugeIcon } from "lucide-react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetLatestSeoReportQuery } from "@/app/store";
@@ -8,6 +8,7 @@ import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
 import { Gauge } from "@/features/seo/components/shared/Gauge";
 import { bandHex } from "@/features/seo/components/utils";
 import { timeAgo } from "@/shared/lib";
+import { Brick } from "@/shared/ui/Bricks";
 import { useDemo } from "@/features/demo/context";
 import { demoSeoReport } from "@/features/demo/demoData";
 import classes from "./SeoScoreCard.module.css";
@@ -75,9 +76,7 @@ export function SeoScoreCard({
   if (isLoading) {
     return (
       <Frame>
-        <Center py="md">
-          <Skeleton height={104} circle />
-        </Center>
+        <Brick height={136} />
       </Frame>
     );
   }

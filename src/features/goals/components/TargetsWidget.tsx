@@ -1,14 +1,18 @@
 import { Link } from "react-router-dom";
-import { Button, Card, Center, Group, Skeleton, Stack, Text } from "@mantine/core";
+import { Button, Card, Center, Group, Stack, Text } from "@mantine/core";
 import { ArrowUpRight, Flag, Plus } from "lucide-react";
 import { Rings } from "@/features/goals/components/ProgressRing";
 import { TargetBar } from "@/features/goals/components/TargetBar";
 import { useTargets } from "@/features/goals/hooks/useTargets";
 import { formatMetric, targetStatus } from "@/features/goals/metrics";
 import { RING_PALETTE } from "@/features/goals/tones";
+import { Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { GoalsAppOffCard } from "@/features/goals/components/GoalsAppOffCard";
 import classes from "@/features/goals/components/Goals.module.css";
+
+const LOADING_ROWS = brickRows(3, 44);
 
 export function TargetsWidget({ workspaceId }: { workspaceId: string }) {
   const { goals: goalsOn } = useWorkspaceApps();
@@ -32,20 +36,7 @@ export function TargetsWidget({ workspaceId }: { workspaceId: string }) {
       </Group>
 
       {loading ? (
-        <div className={classes.widgetRings}>
-          <Skeleton height={104} width={104} circle />
-          <div className={classes.widgetList}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Stack key={i} gap={6}>
-                <Group justify="space-between" wrap="nowrap">
-                  <Skeleton height={12} width="50%" radius="sm" />
-                  <Skeleton height={12} width={56} radius="sm" />
-                </Group>
-                <Skeleton height={6} radius="xl" />
-              </Stack>
-            ))}
-          </div>
-        </div>
+        <Bricks rows={LOADING_ROWS} label="Loading goals" />
       ) : targets.length === 0 ? (
         <Center py="md">
           <Stack align="center" gap={10}>

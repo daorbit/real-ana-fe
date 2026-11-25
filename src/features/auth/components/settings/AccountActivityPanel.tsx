@@ -15,7 +15,7 @@ export function AccountActivityPanel() {
     >
       <div className={classes.activity}>
         {loading ? (
-          <AuditRowsSkeleton rows={3} flat />
+          <AuditRowsSkeleton rows={3} />
         ) : failed ? (
           <ErrorState compact title="Couldn't load your activity" onRetry={retry} />
         ) : (

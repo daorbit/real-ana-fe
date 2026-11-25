@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
-  Badge, Box, Button, Card, Modal, Group, Stack,
+  Badge, Box, Button, Card, Modal, Group,
   Table, Text, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   Pagination,
 } from "@mantine/core";
@@ -49,6 +49,8 @@ import {
   SEO_TABS, isSeoTab, resolveSeoSection, seoTabPath, type SeoSubId, type SeoTabId,
 } from "@/features/seo/components/sections";
 import { SeoInspectSkeleton, SeoTabSkeleton } from "@/features/seo/components/layout/SeoSkeletons";
+import { Bricks } from "@/shared/ui/Bricks";
+import { brickRows } from "@/shared/lib/brickRows";
 import { SeoHelpLink, SeoTabIntro, type SeoTabCount } from "@/features/seo/components/layout/SeoTabs";
 import { SeoTabBar } from "@/features/seo/components/layout/SeoTabBar";
 import { useSeoPages } from "@/features/seo/hooks/useSeoPages";
@@ -61,6 +63,7 @@ import { useTitle } from "@/shared/lib/useTitle";
 
 const HISTORY_LIMIT = 200;
 const HISTORY_PAGE_SIZE = 15;
+const HISTORY_LOADING_ROWS = brickRows(4, 48);
 
 function HistoryPanel({
   history,
@@ -83,13 +86,7 @@ function HistoryPanel({
 
   if (loading) {
     return (
-      <Card withBorder radius="md" padding="md">
-        <Stack gap="xs">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} height={44} radius="sm" />
-          ))}
-        </Stack>
-      </Card>
+      <Bricks rows={HISTORY_LOADING_ROWS} label="Loading report history" />
     );
   }
 

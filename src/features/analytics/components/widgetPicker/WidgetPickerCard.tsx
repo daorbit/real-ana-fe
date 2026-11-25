@@ -19,7 +19,7 @@ function Preview({ id }: { id: WidgetId }) {
   return (
     <div ref={ref} className={classes.preview}>
       {seen && (
-        <Suspense fallback={<ChartSkeleton height={120} bare />}>
+        <Suspense fallback={<ChartSkeleton height={120} />}>
           <WidgetPreviewFrame id={id} />
         </Suspense>
       )}

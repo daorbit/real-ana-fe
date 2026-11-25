@@ -101,10 +101,9 @@ export function CompetitorBriefCard({
 
         {isLoading && (
           <div className={`${classes.stack} orbit-thinking`}>
-            <Skeleton height={12} radius="sm" width="70%" animate={false} />
-            <Skeleton height={34} radius="sm" animate={false} />
-            <Skeleton height={34} radius="sm" animate={false} />
-            <Skeleton height={12} radius="sm" width="55%" animate={false} />
+            <Skeleton height={44} radius={12} animate={false} />
+            <Skeleton height={44} radius={12} animate={false} />
+            <Skeleton height={44} radius={12} animate={false} />
           </div>
         )}
 

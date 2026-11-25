@@ -59,12 +59,6 @@
   outline-offset: 2px;
 }
 
-.skeletonTile,
-.skeletonTile:hover {
-  cursor: default;
-  border-color: var(--border);
-}
-
 .selected,
 .selected:hover {
   border-color: var(--selected-border);
@@ -103,14 +97,6 @@
   padding: 8px 10px 9px;
   border-top: 1px solid var(--border);
   background: var(--surface);
-}
-
-.skeletonMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 10px 10px 11px;
-  border-top: 1px solid var(--border);
 }
 
 .actions {

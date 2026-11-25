@@ -1,75 +1,18 @@
-import { Skeleton } from "@mantine/core";
-import { PanelSkeleton } from "@/shared/ui/Skeletons";
-import home from "@/features/dashboards/components/home/Home.module.css";
+import { Brick, Bricks } from "@/shared/ui/Bricks";
+import type { BrickRow } from "@/shared/lib/brickRows";
+
+const LIST_ROWS: BrickRow[] = [{ height: 40 }, { height: 300, cols: 3 }];
+
+const WELCOME_ROWS: BrickRow[] = [{ height: 440 }, { height: 236, cols: 4 }];
 
 export function ViewSwitchSkeleton() {
-  return <Skeleton height={42} width={320} maw="100%" radius={12} />;
-}
-
-function CardSkeleton() {
-  return (
-    <div className={home.skeletonCard}>
-      <div className={home.skeletonPreview}>
-        <div className={home.skeletonWindow}>
-          <div className={home.skeletonKpis}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} height={26} radius={6} />
-            ))}
-          </div>
-          <Skeleton height={58} radius={6} />
-        </div>
-      </div>
-      <div className={home.skeletonBody}>
-        <Skeleton height={38} width={38} radius={11} />
-        <div className={home.skeletonLines}>
-          <Skeleton height={14} width="62%" radius="sm" />
-          <Skeleton height={10} width="44%" radius="sm" />
-        </div>
-      </div>
-      <div className={home.skeletonFoot}>
-        <Skeleton height={10} width={90} radius="sm" />
-        <Skeleton height={10} width={70} radius="sm" />
-      </div>
-    </div>
-  );
+  return <Brick height={42} width={320} />;
 }
 
 export function DashboardListSkeleton() {
-  return (
-    <>
-      <div className={home.library}>
-        <div className={home.libraryHead}>
-          <Skeleton height={14} width={120} radius="sm" />
-          <div className={home.skeletonInline}>
-            <Skeleton height={36} width={260} radius={8} />
-            <Skeleton height={36} width={160} radius={8} />
-            <Skeleton height={36} width={78} radius={10} />
-          </div>
-        </div>
-        <div className={home.grid}>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-          <div className={home.skeletonNew}>
-            <Skeleton height={40} width={40} radius={12} mb={8} />
-            <Skeleton height={13} width={110} radius="sm" />
-            <Skeleton height={10} width={170} maw="80%" radius="sm" />
-          </div>
-        </div>
-      </div>
-    </>
-  );
+  return <Bricks rows={LIST_ROWS} label="Loading dashboards" />;
 }
 
 export function DashboardWelcomeSkeleton() {
-  return (
-    <div className={home.start}>
-      <PanelSkeleton height={440} />
-      <div className={home.alts}>
-        {Array.from({ length: 4 }, (_, i) => (
-          <PanelSkeleton key={i} height={236} />
-        ))}
-      </div>
-    </div>
-  );
+  return <Bricks rows={WELCOME_ROWS} label="Loading dashboards" />;
 }

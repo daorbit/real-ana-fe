@@ -299,14 +299,6 @@
   white-space: nowrap;
 }
 
-.skeletonRow {
-  padding: 14px 16px;
-}
-
-.skeletonRow + .skeletonRow {
-  border-top: 1px solid var(--notes-hairline);
-}
-
 .bar {
   display: flex;
   flex: none;

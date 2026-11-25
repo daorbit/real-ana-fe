@@ -1,4 +1,4 @@
-import { Skeleton } from "@mantine/core";
+import { Brick } from "@/shared/ui/Bricks";
 import { num } from "@/shared/lib/format";
 import type { AuditSummary } from "@/shared/types";
 import { CATEGORY_META, WORKSPACE_CATEGORIES, type WorkspaceAuditCategory } from "../lib/categories";
@@ -21,9 +21,7 @@ export function AreaChips({
     return (
       <div className={classes.tabs} aria-hidden>
         {TAB_SKELETON_WIDTHS.map((width) => (
-          <span key={width} className={classes.tabSkeleton}>
-            <Skeleton height={12} width={width} radius="sm" />
-          </span>
+          <Brick key={width} height={32} width={width} />
         ))}
       </div>
     );
